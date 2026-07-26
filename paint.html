@@ -82,11 +82,26 @@
             margin-bottom: 5px;
         }
         .color-box {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border: 1px solid #9ca3af;
             cursor: pointer;
-            border-radius: 2px;
+            border-radius: 4px;
+            transition: 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            font-family: sans-serif;
+        }
+        .color-box:hover {
+            transform: scale(1.1);
+        }
+        .color-box.active {
+            border: 2px solid #000;
+            transform: scale(1.2);
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
         }
         input[type="color"] {
             width: 100%;
@@ -101,32 +116,24 @@
 
     <!-- แถบเครื่องมือ (Toolbar) -->
     <div class="toolbar">
-        <button class="tool-btn active" data-tool="pixel">Pixel</button>
-        <button class="tool-btn" data-tool="line">Line</button>
-        <button class="tool-btn" data-tool="rect">Rect</button>
-        <button class="tool-btn" data-tool="ellipse">Ellipse</button>
-        <button class="tool-btn" data-tool="triangle">Triangle</button>
-        <button class="tool-btn" data-tool="eraser">Eraser</button>
+        <button class="tool-btn active" data-tool="pixel">Pixel (P)</button>
+        <button class="tool-btn" data-tool="line">Line (L)</button>
+        <button class="tool-btn" data-tool="rect">Rect (R)</button>
+        <button class="tool-btn" data-tool="ellipse">Ellipse (E)</button>
+        <button class="tool-btn" data-tool="triangle">Triangle (T)</button>
+        <button class="tool-btn" data-tool="eraser">Eraser (X)</button>
         
         <div class="color-picker-container">
             <label>Color</label>
             <div class="color-swatches">
-                <div class="color-box" style="background-color: #000000;" data-color="#000000"></div>
-                <div class="color-box" style="background-color: #ffffff;" data-color="#ffffff"></div>
-                <div class="color-box" style="background-color: #808080;" data-color="#808080"></div>
-                <div class="color-box" style="background-color: #c0c0c0;" data-color="#c0c0c0"></div>
-                <div class="color-box" style="background-color: #ff0000;" data-color="#ff0000"></div>
-                <div class="color-box" style="background-color: #800000;" data-color="#800000"></div>
-                <div class="color-box" style="background-color: #ffff00;" data-color="#ffff00"></div>
-                <div class="color-box" style="background-color: #808000;" data-color="#808000"></div>
-                <div class="color-box" style="background-color: #00ff00;" data-color="#00ff00"></div>
-                <div class="color-box" style="background-color: #008000;" data-color="#008000"></div>
-                <div class="color-box" style="background-color: #00ffff;" data-color="#00ffff"></div>
-                <div class="color-box" style="background-color: #008080;" data-color="#008080"></div>
-                <div class="color-box" style="background-color: #0000ff;" data-color="#0000ff"></div>
-                <div class="color-box" style="background-color: #000080;" data-color="#000080"></div>
-                <div class="color-box" style="background-color: #ff00ff;" data-color="#ff00ff"></div>
-                <div class="color-box" style="background-color: #800080;" data-color="#800080"></div>
+                <div class="color-box" style="background-color: #000000; color: white;" data-color="#000000">1</div>
+                <div class="color-box" style="background-color: #ffffff; color: black;" data-color="#ffffff">2</div>
+                <div class="color-box" style="background-color: #ff0000; color: white;" data-color="#ff0000">3</div>
+                <div class="color-box" style="background-color: #00ff00; color: black;" data-color="#00ff00">4</div>
+                <div class="color-box" style="background-color: #0000ff; color: white;" data-color="#0000ff">5</div>
+                <div class="color-box" style="background-color: #ffff00; color: black;" data-color="#ffff00">6</div>
+                <div class="color-box" style="background-color: #00ffff; color: black;" data-color="#00ffff">7</div>
+                <div class="color-box" style="background-color: #ff00ff; color: white;" data-color="#ff00ff">8</div>
             </div>
             <input type="color" id="color-picker" value="#ff0000">
         </div>
@@ -334,9 +341,11 @@
         document.querySelectorAll('.tool-btn').forEach(btn => {
             if(btn.id !== 'clear-btn') {
                 btn.addEventListener('click', () => {
-                    document.querySelector('.tool-btn.active').classList.remove('active');
+                    const activeBtn = document.querySelector('.tool-btn.active');
+                    if (activeBtn) activeBtn.classList.remove('active');
                     btn.classList.add('active');
                     currentTool = btn.getAttribute('data-tool');
+                    btn.blur(); // เอาโฟกัสออก เพื่อไม่ให้ไปขัดจังหวะ Keyboard Shortcuts
                 });
             }
         });
@@ -345,6 +354,15 @@
         function changeColor(hexColor) {
             currentColor = hexToRgb(hexColor);
             document.getElementById('color-picker').value = hexColor;
+
+            // จัดการคลาส active ให้กล่องสี
+            document.querySelectorAll('.color-box').forEach(box => {
+                if (box.getAttribute('data-color').toLowerCase() === hexColor.toLowerCase()) {
+                    box.classList.add('active');
+                } else {
+                    box.classList.remove('active');
+                }
+            });
             
             // ถ้ากำลังลากเมาส์วาดรูปทรง (ที่ไม่ใช่ pixel/eraser) ให้วาดอัปเดตสีใหม่ทันที
             if (isDrawing && currentTool !== 'pixel' && currentTool !== 'eraser') {
@@ -424,13 +442,10 @@
                 startY = pos.y;
             } else {
                 // ----- โหมดวาดรูปทรง (Line, Rect, Ellipse, Triangle) -----
-                // เทคนิค Rubber-banding:
-                // 1. คืน snapshot (ภาพก่อนลากเมาส์) กลับไปบน Canvas ก่อน
-                //    เพื่อลบรูปทรง preview ที่วาดไปตอนก่อนหน้าทิ้ง
-                ctx.putImageData(snapshot, 0, 0);
-                // 2. ดึง Array ข้อมูลสีปัจจุบันมาทำงานต่อ
-                imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                pixels = imageData.data;
+                // เทคนิค Rubber-banding แบบ High Performance:
+                // แทนที่จะเทภาพลงจอแล้วดึงกลับมาใหม่ (getImageData ซึ่งช้ามากและทำให้ค้าง)
+                // เราใช้วิธีคัดลอก Array จาก snapshot มาทับในหน่วยความจำโดยตรงเลย (เร็วทะลุจอ!)
+                imageData.data.set(snapshot.data);
 
                 // 3. วาดรูปทรงใหม่ตามตำแหน่งเมาส์ล่าสุด
                 if (currentTool === 'line') {
@@ -478,19 +493,29 @@
 
             const key = e.key.toLowerCase();
             
-            // คีย์ลัดเปลี่ยนสี (1-8) เรียงตามกล่องสีบนหน้าจอ
+            // คีย์ลัดเปลี่ยนสี (รองรับทั้งแป้นพิมพ์อังกฤษและแป้นพิมพ์ภาษาไทย)
             const colorKeys = {
-                '1': '#000000', '2': '#ffffff', '3': '#ff0000', '4': '#00ff00', 
-                '5': '#0000ff', '6': '#ffff00', '7': '#ff00ff', '8': '#00ffff'
+                '1': '#000000', 'ๅ': '#000000',
+                '2': '#ffffff', '/': '#ffffff',
+                '3': '#ff0000', '-': '#ff0000',
+                '4': '#00ff00', 'ภ': '#00ff00',
+                '5': '#0000ff', 'ถ': '#0000ff',
+                '6': '#ffff00', 'ุ': '#ffff00',
+                '7': '#00ffff', 'ึ': '#00ffff',
+                '8': '#ff00ff', 'ค': '#ff00ff'
             };
             if (colorKeys[key]) {
                 changeColor(colorKeys[key]);
             }
             
-            // คีย์ลัดเปลี่ยนเครื่องมือ (p, l, r, c, g, e)
+            // คีย์ลัดเปลี่ยนเครื่องมือ (p, l, r, e, t, x) และแป้นไทย
             const toolKeys = {
-                'p': 'pixel', 'l': 'line', 'r': 'rect', 
-                'c': 'ellipse', 'g': 'triangle', 'e': 'eraser'
+                'p': 'pixel', 'ย': 'pixel',
+                'l': 'line',  'ส': 'line',
+                'r': 'rect',  'พ': 'rect',
+                'e': 'ellipse','ำ': 'ellipse',
+                't': 'triangle','ธ': 'triangle',
+                'x': 'eraser', 'ป': 'eraser'
             };
             if (toolKeys[key]) {
                 const activeBtn = document.querySelector('.tool-btn.active');
