@@ -5,3 +5,8 @@
 <p>GitHub งาน comgrap:https://github.com/Githu9Phadol/Githu9Phadol.github.io</p>
 <p>Education:Kasetsart University</p>
 <br>
+<h2>งานทั้งหมด</h2>
+<ul>
+  <li><a href="paint.html">Paint</a></li>
+  <li><a href="raster_paint.html">Raster Graphics Paint</a></li>
+</ul>
