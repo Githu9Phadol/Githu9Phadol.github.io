@@ -265,27 +265,52 @@ canvas.addEventListener('mousemove', (event) => {
     ctx.putImageData(imageData, 0, 0);}
 });
 
-window.addEventListener('keydown', (event) => {
-  if(event.key === '1'){ r = 255; g = 0; b = 0; }
-  if(event.key === '2'){ r = 0; g = 255; b = 0; }
-  if(event.key === '3'){ r = 0; g = 0; b = 255; }
-  if(event.key === 'e'){ r = 255; g = 255; b = 255; }
-  if (event.key == 'ArrowLeft') { degree -= 5; }
-  if (event.key == 'ArrowRight') { degree += 5; }
-  if (event.key == 'ArrowUp') { Scale += 0.1; }
-  if (event.key == 'ArrowDown') { Scale -= 0.1 ; }
-});
+// window.addEventListener('keydown', (event) => {
+//   if(event.key === '1'){ r = 255; g = 0; b = 0; }
+//   if(event.key === '2'){ r = 0; g = 255; b = 0; }
+//   if(event.key === '3'){ r = 0; g = 0; b = 255; }
+//   if(event.key === 'e'){ r = 255; g = 255; b = 255; }
+//   if (event.key == 'ArrowLeft') { degree -= 5; }
+//   if (event.key == 'ArrowRight') { degree += 5; }
+//   if (event.key == 'ArrowUp') { Scale += 0.1; }
+//   if (event.key == 'ArrowDown') { Scale -= 0.1 ; }
+// });
+window.addEventListener("keydown", (event) => {
+
+    if (event.key === "ArrowLeft") {
+        degree -= 5;
+    }
+
+    if (event.key === "ArrowRight") {
+        degree += 5;
+    }
+
+    if (event.key === "ArrowUp") {
+        Scale += 0.1;
+    }
+
+    if (event.key === "ArrowDown") {
+        Scale = Math.max(0.1, Scale - 0.1);
+    }
+
+});  
 
 ctx.putImageData(imageData, 0, 0);
 
 function animate() {
-  // degree += 1;
-  drawRectFilled(0, 0, canvas.width - 1, canvas.height - 1, 255, 255, 255);
-  // drawSprite24Bit(diamondSwordSprite24Bit, 50, 50);
-  // drawSpriteRotationScale(smileSprite24Bit, mouseX, mouseY, degree, Scale, Scale, 255, 0, 0);
-  drawSprite24BitRotationScale(diamondSwordSprite24Bit,mouseX,mouseY,degree,Scale,Scale);
-  ctx.putImageData(imageData, 0, 0);
-  requestAnimationFrame(animate);
+    drawRectFilled(0, 0, canvas.width - 1, canvas.height - 1, 255, 255, 255);
+
+    drawSprite24BitRotationScale(
+        diamondSwordSprite24Bit,
+        mouseX,
+        mouseY,
+        degree,
+        Scale,
+        Scale
+    );
+
+    ctx.putImageData(imageData, 0, 0);
+    requestAnimationFrame(animate);
 }
 animate();
 </script>
