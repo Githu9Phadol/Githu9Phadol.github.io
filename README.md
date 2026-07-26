@@ -14,8 +14,10 @@
 
 <h2>งานทั้งหมด</h2>
 <ul>
+  <li><a href="index.html">24bit</a></li>
   <li><a href="paint.html">Paint</a></li>
   <li><a href="raster_paint.html">Raster Graphics Paint</a></li>
+  
 </ul>
 
 </body>
