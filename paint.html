@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Paint</title>
+    <style>
+        :root {
+            --bg-color: #f3f4f6;
+            --panel-bg: #ffffff;
+            --border-color: #d1d5db;
+            --primary-color: #3b82f6;
+            --text-color: #1f2937;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        .toolbar {
+            width: 80px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .tool-btn {
+            background: #e5e7eb;
+            border: none;
+            padding: 15px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .tool-btn:hover {
+            background: #d1d5db;
+        }
+        .tool-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            cursor: crosshair;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            image-rendering: pixelated; /* เพื่อให้เห็นพิกเซลชัดเจน ไม่เบลอ */
+        }
+        .color-picker-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            width: 100%;
+        }
+        .color-swatches {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 5px;
+        }
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #9ca3af;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+        input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- แถบเครื่องมือ (Toolbar) -->
+    <div class="toolbar">
+        <button class="tool-btn active" data-tool="pixel">Pixel</button>
+        <button class="tool-btn" data-tool="line">Line</button>
+        <button class="tool-btn" data-tool="rect">Rect</button>
+        <button class="tool-btn" data-tool="ellipse">Ellipse</button>
+        <button class="tool-btn" data-tool="triangle">Triangle</button>
+        <button class="tool-btn" data-tool="eraser">Eraser</button>
+        
+        <div class="color-picker-container">
+            <label>Color</label>
+            <div class="color-swatches">
+                <div class="color-box" style="background-color: #000000;" data-color="#000000"></div>
+                <div class="color-box" style="background-color: #ffffff;" data-color="#ffffff"></div>
+                <div class="color-box" style="background-color: #808080;" data-color="#808080"></div>
+                <div class="color-box" style="background-color: #c0c0c0;" data-color="#c0c0c0"></div>
+                <div class="color-box" style="background-color: #ff0000;" data-color="#ff0000"></div>
+                <div class="color-box" style="background-color: #800000;" data-color="#800000"></div>
+                <div class="color-box" style="background-color: #ffff00;" data-color="#ffff00"></div>
+                <div class="color-box" style="background-color: #808000;" data-color="#808000"></div>
+                <div class="color-box" style="background-color: #00ff00;" data-color="#00ff00"></div>
+                <div class="color-box" style="background-color: #008000;" data-color="#008000"></div>
+                <div class="color-box" style="background-color: #00ffff;" data-color="#00ffff"></div>
+                <div class="color-box" style="background-color: #008080;" data-color="#008080"></div>
+                <div class="color-box" style="background-color: #0000ff;" data-color="#0000ff"></div>
+                <div class="color-box" style="background-color: #000080;" data-color="#000080"></div>
+                <div class="color-box" style="background-color: #ff00ff;" data-color="#ff00ff"></div>
+                <div class="color-box" style="background-color: #800080;" data-color="#800080"></div>
+            </div>
+            <input type="color" id="color-picker" value="#ff0000">
+        </div>
+
+        <div class="color-picker-container">
+            <label>Thickness: <span id="thickness-val">1</span></label>
+            <input type="range" id="thickness" min="1" max="20" value="1" style="width: 100%;">
+        </div>
+
+        <button class="tool-btn" id="clear-btn" style="margin-top: auto; background: #ef4444; color: white;">Clear</button>
+    </div>
+
+    <!-- พื้นที่วาดรูป (Canvas) -->
+    <div class="canvas-container">
+        <h2 style="margin-top:0;">Paint</h2>
+        <canvas id="canvas" width="1200" height="800"></canvas>
+    </div>
+
+    <script>
+        // ============================================================================
+        // ส่วนที่ 1: การตั้งค่าพื้นฐาน (Setup Canvas & Image Data)
+        // ============================================================================
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        
+        // เราใช้ create ImageData เพื่อสร้างพื้นที่หน่วยความจำสำหรับเก็บค่าสีของแต่ละพิกเซล
+        // imageData.data จะคืนค่ากลับมาเป็น Array 1 มิติขนาดยาว (width * height * 4)
+        // เหตุผลที่คูณ 4 เพราะ 1 พิกเซลประกอบด้วย 4 ค่า คือ R (Red), G (Green), B (Blue), A (Alpha)
+        let imageData = ctx.createImageData(canvas.width, canvas.height);
+        let pixels = imageData.data; 
+
+        // ฟังก์ชันสำหรับล้างหน้าจอให้เป็นสีขาว
+        function clearCanvas() {
+            // วนลูปทีละ 4 ช่อง เพื่อกำหนดค่า RGBA ให้กับทุกๆ พิกเซล
+            for (let i = 0; i < pixels.length; i += 4) {
+                pixels[i] = 255;     // R (แดง) = 255
+                pixels[i+1] = 255;   // G (เขียว) = 255
+                pixels[i+2] = 255;   // B (น้ำเงิน) = 255
+                pixels[i+3] = 255;   // A (ความทึบ) = 255 (ทึบ 100%)
+            }
+            // นำ Array ที่เราแก้ค่าสีแล้ว เทกลับลงไปบน Canvas เพื่อแสดงผล
+            ctx.putImageData(imageData, 0, 0);
+        }
+        clearCanvas(); // เรียกใช้ครั้งแรกเพื่อถมจอเป็นสีขาว
+
+
+        // ============================================================================
+        // ส่วนที่ 2: ฟังก์ชันพื้นฐานของ Raster Graphics (สำคัญสำหรับสอบ!)
+        // ============================================================================
+
+        /* 
+         * ฟังก์ชัน putPixel (แต้มจุด) 
+         * ทำหน้าที่เปลี่ยนสีพิกเซลที่พิกัด (x, y) ที่กำหนด
+         * การแปลงพิกัด (x, y) แบบ 2 มิติ ให้กลายเป็น Index ใน Array แบบ 1 มิติ ใช้สมการ:
+         * index = (y * ความกว้างหน้าจอ + x) * 4
+         */
+        function putPixel(x, y, r, g, b, a = 255) {
+            // ฟังก์ชันย่อยสำหรับวาดพิกเซลเดี่ยวๆ ลง Array
+            function setSinglePixel(px, py) {
+                px = Math.floor(px);
+                py = Math.floor(py);
+                if(px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) return;
+                const idx = (py * canvas.width + px) * 4;
+                pixels[idx] = r;
+                pixels[idx + 1] = g;
+                pixels[idx + 2] = b;
+                pixels[idx + 3] = a;
+            }
+
+            // ถ้าขนาดเส้น = 1 วาดแค่จุดเดียว
+            if (typeof currentThickness === 'undefined' || currentThickness <= 1) {
+                setSinglePixel(x, y);
+            } else {
+                // ถ้าขนาดเส้นใหญ่กว่า 1 ให้วาดวงกลมทึบบริเวณจุด (x, y)
+                const radius = Math.floor(currentThickness / 2);
+                for (let dy = -radius; dy <= radius; dy++) {
+                    for (let dx = -radius; dx <= radius; dx++) {
+                        if (dx * dx + dy * dy <= radius * radius) {
+                            setSinglePixel(x + dx, y + dy);
+                        }
+                    }
+                }
+            }
+        }
+
+        /*
+         * ฟังก์ชัน drawLine (วาดเส้นตรง)
+         * ใช้หลักการคำนวณสมการเส้นตรง y = mx + c (คล้าย DDA / Bresenham's)
+         */
+        function drawLine(x1, y1, x2, y2, r, g, b, a = 255) {
+            // หาความยาวตามแนวแกน X (dx) และแนวแกน Y (dy)
+            const dx = Math.abs(x2 - x1);
+            const dy = Math.abs(y2 - y1);
+
+            // เราต้องเลือกว่าจะ "เดิน" (วนลูป) ตามแกน X หรือแกน Y
+            // หลักการคือ: แกนไหนยาวกว่า ให้เดินตามแกนนั้นทีละ 1 พิกเซล เพื่อไม่ให้เส้นขาด
+            
+            if(dx > dy) {
+                // เดินตามแกน X (ความชันน้อย)
+                // ตรวจสอบว่า x1 > x2 ไหม ถ้าใช่ สลับค่ากัน (เพื่อให้วาดจากซ้ายไปขวาเสมอ)
+                if(x1 > x2) { 
+                    [x1, x2] = [x2, x1]; 
+                    [y1, y2] = [y2, y1]; 
+                }
+                const m = (y2 - y1) / (x2 - x1); // หาความชัน m
+                const c = y1 - m * x1;           // หาจุดตัดแกน Y (c)
+                
+                // วนลูปตามแกน X แล้วหาค่า Y
+                for (let x = x1; x <= x2; x++) {
+                    const y = Math.round(m * x + c);
+                    putPixel(x, y, r, g, b, a);
+                }
+            } else {
+                // เดินตามแกน Y (ความชันมาก หรือเป็นเส้นตั้งฉาก)
+                if(y1 > y2) { 
+                    [y1, y2] = [y2, y1]; 
+                    [x1, x2] = [x2, x1]; 
+                }
+                
+                // กันกรณีเป็นจุด (กดเฉยๆ ไม่ลาก)
+                if(y1 === y2) { putPixel(x1, y1, r, g, b, a); return; }
+                
+                // สลับสมการเป็น x = my + c
+                const m = (x2 - x1) / (y2 - y1);
+                const c = x1 - m * y1;
+                
+                // วนลูปตามแกน Y แล้วหาค่า X
+                for (let y = y1; y <= y2; y++) {
+                    const x = Math.round(m * y + c);
+                    putPixel(x, y, r, g, b, a);
+                }
+            }
+        }
+
+        /*
+         * ฟังก์ชัน drawRect (วาดสี่เหลี่ยม)
+         * เป็นการประยุกต์ใช้ฟังก์ชัน drawLine เพื่อลากเส้น 4 เส้นมาต่อกัน
+         */
+        function drawRect(x1, y1, x2, y2, r, g, b, a = 255) {
+            drawLine(x1, y1, x2, y1, r, g, b, a); // ลากเส้นขอบบน
+            drawLine(x2, y1, x2, y2, r, g, b, a); // ลากเส้นขอบขวา
+            drawLine(x2, y2, x1, y2, r, g, b, a); // ลากเส้นขอบล่าง
+            drawLine(x1, y2, x1, y1, r, g, b, a); // ลากเส้นขอบซ้าย
+        }
+
+        /*
+         * ฟังก์ชัน drawEllipse (วาดวงรี)
+         * ใช้สมการคณิตศาสตร์ของวงรี: (x^2 / rx^2) + (y^2 / ry^2) = 1
+         */
+        function drawEllipse(cx, cy, rx, ry, r, g, b, a = 255) {
+            if(rx === 0 || ry === 0) return;
+            
+            // วนลูปตรวจสอบทุกพิกเซลที่อยู่ในกรอบสี่เหลี่ยมรอบๆ วงรี (Bounding Box)
+            for (let y = -ry; y <= ry; y++) {
+                for (let x = -rx; x <= rx; x++) {
+                    // ถ้าผลคำนวณน้อยกว่าหรือเท่ากับ 1 แสดงว่าพิกเซลนั้นอยู่ "ในขอบเขต" ของวงรี
+                    // (ข้อควรระวัง: โค้ดนี้จะวาดวงรีแบบทึบ (Filled) ถ้าต้องการเส้นขอบต้องเช็คว่ามีค่าเข้าใกล้ 1 แทน)
+                    if ((x * x) / (rx * rx) + (y * y) / (ry * ry) <= 1) {
+                        putPixel(cx + x, cy + y, r, g, b, a);
+                    }
+                }
+            }
+        }
+
+        /*
+         * ฟังก์ชัน drawTriangle (วาดสามเหลี่ยมหน้าจั่ว)
+         * คำนวณหาจุดยอด 3 จุด จากกรอบสี่เหลี่ยมที่ลากเมาส์ แล้วใช้ drawLine ลากเส้นเชื่อม
+         */
+        function drawTriangle(x1, y1, x2, y2, r, g, b, a = 255) {
+            // จุดที่ 1: ตรงกลางด้านบนของกรอบ
+            const topX = Math.round(x1 + (x2 - x1) / 2);
+            const topY = Math.min(y1, y2);
+            // จุดที่ 2: มุมซ้ายล่าง
+            const leftX = Math.min(x1, x2);
+            const bottomY = Math.max(y1, y2);
+            // จุดที่ 3: มุมขวาล่าง
+            const rightX = Math.max(x1, x2);
+
+            drawLine(topX, topY, leftX, bottomY, r, g, b, a); // เส้นซ้าย
+            drawLine(leftX, bottomY, rightX, bottomY, r, g, b, a); // ฐาน
+            drawLine(rightX, bottomY, topX, topY, r, g, b, a); // เส้นขวา
+        }
+
+
+        // ============================================================================
+        // ส่วนที่ 3: ระบบปฏิสัมพันธ์กับผู้ใช้ (Interaction / Events)
+        // ============================================================================
+
+        // ตัวแปรเก็บสถานะการทำงาน
+        let currentTool = 'pixel';
+        let isDrawing = false;
+        let startX, startY;
+        let lastMousePos = {x: 0, y: 0}; // เก็บพิกัดเมาส์ล่าสุด
+        let currentColor = {r: 255, g: 0, b: 0};
+        let currentThickness = 1; // ขนาดเส้น
+        let snapshot; // เก็บภาพ Canvas ณ วินาทีก่อนลากเมาส์
+
+        // แปลงค่าสีจาก Hex (#ff0000) เป็น Object แบบ RGB {r, g, b}
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : {r:0, g:0, b:0};
+        }
+
+        // จัดการเหตุการณ์เมื่อผู้ใช้กดเลือกเครื่องมือต่างๆ
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            if(btn.id !== 'clear-btn') {
+                btn.addEventListener('click', () => {
+                    document.querySelector('.tool-btn.active').classList.remove('active');
+                    btn.classList.add('active');
+                    currentTool = btn.getAttribute('data-tool');
+                });
+            }
+        });
+
+        // ฟังก์ชันเปลี่ยนสี พร้อมบังคับอัปเดตถ้ากำลังวาดรูปทรงอยู่
+        function changeColor(hexColor) {
+            currentColor = hexToRgb(hexColor);
+            document.getElementById('color-picker').value = hexColor;
+            
+            // ถ้ากำลังลากเมาส์วาดรูปทรง (ที่ไม่ใช่ pixel/eraser) ให้วาดอัปเดตสีใหม่ทันที
+            if (isDrawing && currentTool !== 'pixel' && currentTool !== 'eraser') {
+                handleDraw(lastMousePos);
+            }
+        }
+
+        // จัดการเหตุการณ์เมื่อคลิกเลือกสีจากกล่องสี (Color Swatches)
+        document.querySelectorAll('.color-box').forEach(box => {
+            box.addEventListener('click', (e) => {
+                changeColor(e.target.getAttribute('data-color'));
+            });
+        });
+
+        // จัดการเหตุการณ์เมื่อเลือกสีจากเครื่องมือเลือกสี
+        document.getElementById('color-picker').addEventListener('input', (e) => {
+            changeColor(e.target.value);
+        });
+
+        // จัดการเหตุการณ์เมื่อปรับความหนาเส้น
+        const thicknessInput = document.getElementById('thickness');
+        const thicknessVal = document.getElementById('thickness-val');
+        thicknessInput.addEventListener('input', (e) => {
+            currentThickness = parseInt(e.target.value, 10);
+            thicknessVal.textContent = currentThickness;
+        });
+
+        // ล้างกระดาน
+        document.getElementById('clear-btn').addEventListener('click', clearCanvas);
+
+        // ฟังก์ชันช่วยหาพิกัดเมาส์ให้ตรงกับพิกัดจริงๆ บน Canvas
+        const getMousePos = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                x: Math.floor((e.clientX - rect.left) * scaleX),
+                y: Math.floor((e.clientY - rect.top) * scaleY)
+            };
+        };
+
+        // --- เมื่อคลิกเมาส์ค้าง (Mousedown) ---
+        // บันทึกจุดเริ่มต้น และถ่าย snapshot ไว้ใช้ตอน preview รูปทรง
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            const pos = getMousePos(e);
+            startX = pos.x;
+            startY = pos.y;
+            lastMousePos = pos;
+            
+            // ถ่าย snapshot เก็บภาพก่อนวาด (ใช้สำหรับ preview รูปทรง Rubber-banding)
+            snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // รีเฟรช pixels array ให้เป็นข้อมูลล่าสุด
+            imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            pixels = imageData.data;
+        });
+
+        /*
+         * ฟังก์ชัน handleDraw(pos)
+         * ทำหน้าที่วาดทุกอย่างตอนที่ผู้ใช้ลากเมาส์
+         * แยกออกมาจาก mousemove เพื่อให้เรียกซ้ำได้ตอนเปลี่ยนสีกลางคัน
+         */
+        function handleDraw(pos) {
+            if (!isDrawing) return; // ถ้าไม่ได้กดเมาส์ค้างอยู่ ไม่ต้องทำอะไร
+            const {r, g, b} = currentColor; // ดึงค่าสีปัจจุบัน
+
+            if (currentTool === 'pixel' || currentTool === 'eraser') {
+                // ----- โหมด Freehand (วาดอิสระ / ยางลบ) -----
+                // ลากเส้นจากจุดก่อนหน้า (startX, startY) มายังจุดเมาส์ปัจจุบัน
+                // วิธีนี้ทำให้เส้นต่อเนื่องไม่มีรอยขาด แม้เมาส์เคลื่อนเร็ว
+                // เหมือนกับที่ห้องเรียนใช้ drawLine(previousX, previousY, x, y, r, g, b)
+                const color = currentTool === 'eraser' ? {r: 255, g: 255, b: 255} : currentColor;
+                drawLine(startX, startY, pos.x, pos.y, color.r, color.g, color.b);
+                ctx.putImageData(imageData, 0, 0); // เทภาพจาก Array ลงจอ
+                startX = pos.x; // อัปเดตจุดเริ่มต้นใหม่ให้เป็นตำแหน่งล่าสุด
+                startY = pos.y;
+            } else {
+                // ----- โหมดวาดรูปทรง (Line, Rect, Ellipse, Triangle) -----
+                // เทคนิค Rubber-banding:
+                // 1. คืน snapshot (ภาพก่อนลากเมาส์) กลับไปบน Canvas ก่อน
+                //    เพื่อลบรูปทรง preview ที่วาดไปตอนก่อนหน้าทิ้ง
+                ctx.putImageData(snapshot, 0, 0);
+                // 2. ดึง Array ข้อมูลสีปัจจุบันมาทำงานต่อ
+                imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                pixels = imageData.data;
+
+                // 3. วาดรูปทรงใหม่ตามตำแหน่งเมาส์ล่าสุด
+                if (currentTool === 'line') {
+                    drawLine(startX, startY, pos.x, pos.y, r, g, b);
+                } else if (currentTool === 'rect') {
+                    drawRect(startX, startY, pos.x, pos.y, r, g, b);
+                } else if (currentTool === 'ellipse') {
+                    // คำนวณรัศมี X, Y และจุดศูนย์กลางจากกรอบที่ลาก
+                    const rx = Math.abs(pos.x - startX) / 2;
+                    const ry = Math.abs(pos.y - startY) / 2;
+                    const cx = startX + (pos.x - startX) / 2; // กึ่งกลาง X
+                    const cy = startY + (pos.y - startY) / 2; // กึ่งกลาง Y
+                    drawEllipse(Math.round(cx), Math.round(cy), Math.round(rx), Math.round(ry), r, g, b);
+                } else if (currentTool === 'triangle') {
+                    drawTriangle(startX, startY, pos.x, pos.y, r, g, b);
+                }
+                // 4. เทภาพ preview ขึ้นจอ
+                ctx.putImageData(imageData, 0, 0);
+            }
+        }
+
+        // --- เมื่อลากเมาส์ (Mousemove) ---
+        // เรียก handleDraw() ทุกครั้งที่เมาส์เคลื่อนที่ขณะกดค้าง
+        // และเก็บพิกัดล่าสุดไว้ใน lastMousePos เผื่อเรียกซ้ำตอนเปลี่ยนสี
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            const pos = getMousePos(e);
+            lastMousePos = pos; // เก็บพิกัดล่าสุดไว้
+            handleDraw(pos);
+        });
+
+        // --- เมื่อปล่อยเมาส์ (Mouseup) ---
+        // Listen ทั้งบน canvas และ window เพื่อให้จับได้
+        // แม้ผู้ใช้จะเผลอลากเมาส์ออกนอก canvas แล้วปล่อย
+        canvas.addEventListener('mouseup', () => { isDrawing = false; });
+        window.addEventListener('mouseup', () => { isDrawing = false; });
+
+        // --- เมื่อเมาส์ออกนอกพื้นที่ Canvas (Mouseleave) ---
+        // หยุดวาดทันทีเพื่อป้องกันการวาดค้างเมื่อกลับเข้ามาใหม่
+        canvas.addEventListener('mouseleave', () => {
+            isDrawing = false;
+        });
+
+        // --- คีย์ลัด (Keyboard Shortcuts) ---
+        // ใช้ e.target.tagName เช็คก่อนว่ากำลังพิมพ์ใน input อยู่ไหม
+        // ถ้าใช่ไม่ต้องทำอะไร (ป้องกันการพิมพ์ตัวเลขใน thickness input แล้วเปลี่ยนสีพลาด)
+        window.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return; // กำลังพิมพ์ใน input → ข้ามไป
+
+            const key = e.key.toLowerCase();
+            
+            // คีย์ลัดเปลี่ยนสี (1-8) เรียงตามกล่องสีบนหน้าจอ
+            const colorKeys = {
+                '1': '#000000', '2': '#ffffff', '3': '#ff0000', '4': '#00ff00', 
+                '5': '#0000ff', '6': '#ffff00', '7': '#ff00ff', '8': '#00ffff'
+            };
+            if (colorKeys[key]) {
+                changeColor(colorKeys[key]);
+            }
+            
+            // คีย์ลัดเปลี่ยนเครื่องมือ (p, l, r, c, g, e)
+            const toolKeys = {
+                'p': 'pixel', 'l': 'line', 'r': 'rect', 
+                'c': 'ellipse', 'g': 'triangle', 'e': 'eraser'
+            };
+            if (toolKeys[key]) {
+                const activeBtn = document.querySelector('.tool-btn.active');
+                if (activeBtn) activeBtn.classList.remove('active');
+                const btn = document.querySelector(`.tool-btn[data-tool="${toolKeys[key]}"]`);
+                if (btn) {
+                    btn.classList.add('active');
+                    currentTool = toolKeys[key];
+                }
+            }
+        });
+    </script>
+</body>
+</html>
