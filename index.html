@@ -185,7 +185,20 @@ const smileSprite24Bit = [
   [null,       0xD97706,   0xFDE047, 0x111827, 0x111827, 0xFDE047, 0xD97706, null      ],
   [null,       null,       0xB45309, 0xD97706, 0xD97706, 0xB45309, null,       null      ],
 ];
-
+const diamondSwordSprite24Bit = [
+  [0x003838, 0x003838, null,     null,     null,     null,     null,     null],
+  [0x003838, 0x41E0D0, 0x004848, null,     null,     null,     null,     null],
+  [null,     0x41E0D0, 0x38D0C0, 0x003838, null,     null,     null,     null],
+  [null,     0x38D0C0, 0x41E0D0, 0x38D0C0, 0x003838, null,     null,     null],
+  [null,     null,     0x38D0C0, 0x41E0D0, 0x38D0C0, 0x003838, null,     null],
+  [null,     null,     null,     0x38D0C0, 0x41E0D0, 0x38D0C0, 0x003838, null],
+  [null,     null,     null,     null,     0x38D0C0, 0x41E0D0, 0x003838, 0x003838],
+  [null,     null,     null,     null,     null,     0x003838, 0x0A5A5A, 0x003838],
+  [null,     null,     null,     null,     0x003838, 0x0A5A5A, 0x003838, 0x6B4A1E],
+  [null,     null,     null,     0x003838, 0x003838, 0x0A5A5A, 0x6B4A1E, 0x9C7330],
+  [null,     null,     0x003838, 0x0A5A5A, 0x003838, 0x003838, 0x6B4A1E, 0x6B4A1E],
+  [null,     null,     null,     0x003838, null,     null,     null,     0x003838]
+];
    let isDragging = false; 
    let lastX = 0, lastY = 0; 
    let r = 0, g = 0, b = 0; 
@@ -255,7 +268,7 @@ function animate() {
 degree += 1; 
 drawRectFilled(0, 0, canvas.width - 1, canvas.height - 1, 255, 255, 255); 
 drawSprite24Bit(smileSprite24Bit, 50, 50); 
-drawSpriteRotationScale(spaceInvaderSprite, mouseX, mouseY, degree, Scale, Scale, 255, 0, 0); 
+drawSpriteRotationScale(diamondSwordSprite24Bit, mouseX, mouseY, degree, Scale, Scale, 255, 0, 0); 
 ctx.putImageData(imageData, 0, 0); 
 requestAnimationFrame(animate); 
 
