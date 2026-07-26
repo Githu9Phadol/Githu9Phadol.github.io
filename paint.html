@@ -453,30 +453,21 @@
         }
 
         // --- เมื่อลากเมาส์ (Mousemove) ---
-        // เรียก handleDraw() ทุกครั้งที่เมาส์เคลื่อนที่ขณะกดค้าง
-        // และเก็บพิกัดล่าสุดไว้ใน lastMousePos เผื่อเรียกซ้ำตอนเปลี่ยนสี
-        canvas.addEventListener('mousemove', (e) => {
+        // เปลี่ยนมาจับ Event บน window แทน canvas 
+        // เพื่อให้วาดต่อเนื่องได้แม้เมาส์จะหลุดออกนอกกรอบไปแล้ว (เหมือน MS Paint)
+        window.addEventListener('mousemove', (e) => {
             if (!isDrawing) return;
+            // ถ่ายทอดพิกัดเมาส์ (ถึงจะอยู่นอก canvas ฟังก์ชัน getMousePos ก็ยังคำนวณพิกัดให้)
+            // ฟังก์ชัน putPixel มีการเช็ค (x < 0 || x >= width) ไว้แล้ว จึงไม่ Error
             const pos = getMousePos(e);
-            lastMousePos = pos; // เก็บพิกัดล่าสุดไว้
+            lastMousePos = pos; 
             handleDraw(pos);
         });
 
         // --- เมื่อปล่อยเมาส์ (Mouseup) ---
-        // Listen ทั้งบน canvas และ window เพื่อให้จับได้
-        // แม้ผู้ใช้จะเผลอลากเมาส์ออกนอก canvas แล้วปล่อย
-        canvas.addEventListener('mouseup', () => { isDrawing = false; });
-        window.addEventListener('mouseup', () => { isDrawing = false; });
-
-        // --- เมื่อเมาส์ออก/เข้า พื้นที่ Canvas ---
-        // ไม่สั่งหยุดวาดตอนออก (mouseleave) เพื่อให้ลากกลับเข้ามาวาดต่อได้
-        canvas.addEventListener('mouseenter', (e) => {
-            // ถ้ากลับเข้ามาแล้วยังกดคลิกซ้ายค้างอยู่ (e.buttons === 1)
-            if (isDrawing && e.buttons === 1) {
-                lastMousePos = getMousePos(e); // อัปเดตจุดเริ่มใหม่ เพื่อไม่ให้เส้นโยงยาวข้ามกระดาน
-            } else {
-                isDrawing = false; // ถ้าปล่อยคลิกไปแล้วตอนอยู่ข้างนอก ให้หยุดวาด
-            }
+        // Listen บน window เพื่อให้จับได้ แม้ผู้ใช้จะลากเมาส์ออกนอก canvas แล้วปล่อย
+        window.addEventListener('mouseup', () => { 
+            isDrawing = false; 
         });
 
         // --- คีย์ลัด (Keyboard Shortcuts) ---
