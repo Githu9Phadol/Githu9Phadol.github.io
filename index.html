@@ -122,6 +122,33 @@ function drawSpriteRotationScale(sprite, x, y, degree, scaleX, scaleY, r, g, b, 
     }
   }
 }
+function drawSprite24BitRotationScale(sprite, x, y, degree, scaleX, scaleY) {
+    const rad = degree * Math.PI / 180;
+
+    for (let j = 0; j < sprite.length; j++) {
+        for (let i = 0; i < sprite[j].length; i++) {
+
+            const color = sprite[j][i];
+            if (color === null) continue;
+
+            const r = (color >> 16) & 255;
+            const g = (color >> 8) & 255;
+            const b = color & 255;
+
+            const cx = i - sprite[0].length / 2;
+            const cy = j - sprite.length / 2;
+
+            const rx = (cx * Math.cos(rad) - cy * Math.sin(rad)) * scaleX;
+            const ry = (cx * Math.sin(rad) + cy * Math.cos(rad)) * scaleY;
+
+            putPixel(
+                Math.round(x + rx),
+                Math.round(y + ry),
+                r, g, b
+            );
+        }
+    }
+}  
 
 function drawSprite24Bit(sprite, x, y) {
   for (let j = 0; j < sprite.length; j++) {
@@ -246,8 +273,9 @@ ctx.putImageData(imageData, 0, 0);
 function animate() {
   degree += 1;
   drawRectFilled(0, 0, canvas.width - 1, canvas.height - 1, 255, 255, 255);
-  drawSprite24Bit(diamondSwordSprite24Bit, 50, 50);
-  drawSpriteRotationScale(smileSprite24Bit, mouseX, mouseY, degree, Scale, Scale, 255, 0, 0);
+  // drawSprite24Bit(diamondSwordSprite24Bit, 50, 50);
+  // drawSpriteRotationScale(smileSprite24Bit, mouseX, mouseY, degree, Scale, Scale, 255, 0, 0);
+  drawSprite24BitRotationScale(diamondSwordSprite24Bit,mouseX,mouseY,degree,Scale,Scale);
   ctx.putImageData(imageData, 0, 0);
   requestAnimationFrame(animate);
 }
