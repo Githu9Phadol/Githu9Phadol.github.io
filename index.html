@@ -123,12 +123,13 @@ function drawSpriteRotationScale(sprite, x, y, degree, scaleX, scaleY, r, g, b, 
   }
 }
 function drawSprite24BitRotationScale(sprite, x, y, degree, scaleX, scaleY) {
+
     const rad = degree * Math.PI / 180;
     const cos = Math.cos(rad);
     const sin = Math.sin(rad);
 
-    const cx0 = (sprite[0].length - 1) / 2;
-    const cy0 = (sprite.length - 1) / 2;
+    const cx0 = sprite[0].length / 2;
+    const cy0 = sprite.length / 2;
 
     for (let j = 0; j < sprite.length; j++) {
         for (let i = 0; i < sprite[j].length; i++) {
@@ -140,15 +141,15 @@ function drawSprite24BitRotationScale(sprite, x, y, degree, scaleX, scaleY) {
             const g = (color >> 8) & 255;
             const b = color & 255;
 
-            const cx = i - cx0;
-            const cy = j - cy0;
+            const px = i - cx0;
+            const py = j - cy0;
 
-            const rx = (cx * cos - cy * sin) * scaleX;
-            const ry = (cx * sin + cy * cos) * scaleY;
+            const rx = px * cos - py * sin;
+            const ry = px * sin + py * cos;
 
             drawEllipse(
-                Math.round(x + rx),
-                Math.round(y + ry),
+                Math.round(x + rx * scaleX),
+                Math.round(y + ry * scaleY),
                 Math.max(1, Math.round(scaleX)),
                 Math.max(1, Math.round(scaleY)),
                 r, g, b
@@ -156,7 +157,6 @@ function drawSprite24BitRotationScale(sprite, x, y, degree, scaleX, scaleY) {
         }
     }
 }
-
 function drawSprite24Bit(sprite, x, y) {
   for (let j = 0; j < sprite.length; j++) {
     for (let i = 0; i < sprite[j].length; i++) {
