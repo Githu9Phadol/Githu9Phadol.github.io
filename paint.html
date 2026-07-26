@@ -468,10 +468,15 @@
         canvas.addEventListener('mouseup', () => { isDrawing = false; });
         window.addEventListener('mouseup', () => { isDrawing = false; });
 
-        // --- เมื่อเมาส์ออกนอกพื้นที่ Canvas (Mouseleave) ---
-        // หยุดวาดทันทีเพื่อป้องกันการวาดค้างเมื่อกลับเข้ามาใหม่
-        canvas.addEventListener('mouseleave', () => {
-            isDrawing = false;
+        // --- เมื่อเมาส์ออก/เข้า พื้นที่ Canvas ---
+        // ไม่สั่งหยุดวาดตอนออก (mouseleave) เพื่อให้ลากกลับเข้ามาวาดต่อได้
+        canvas.addEventListener('mouseenter', (e) => {
+            // ถ้ากลับเข้ามาแล้วยังกดคลิกซ้ายค้างอยู่ (e.buttons === 1)
+            if (isDrawing && e.buttons === 1) {
+                lastMousePos = getMousePos(e); // อัปเดตจุดเริ่มใหม่ เพื่อไม่ให้เส้นโยงยาวข้ามกระดาน
+            } else {
+                isDrawing = false; // ถ้าปล่อยคลิกไปแล้วตอนอยู่ข้างนอก ให้หยุดวาด
+            }
         });
 
         // --- คีย์ลัด (Keyboard Shortcuts) ---
