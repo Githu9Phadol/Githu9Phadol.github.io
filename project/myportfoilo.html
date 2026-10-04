@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>My Portfolio Room</title>
+<style>
+  :root {
+    --bg-light: #f4f2fb;
+    --bg-dark: #14121f;
+    --panel-light: rgba(255, 255, 255, 0.7);
+    --panel-dark: rgba(30, 27, 46, 0.7);
+    --text-light: #2a2640;
+    --text-dark: #f0eefa;
+    --accent: #b79cf0;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background:
+      radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0) 36%),
+      radial-gradient(circle at 18% 78%, rgba(185, 160, 205, 0.45) 0%, rgba(185, 160, 205, 0) 46%),
+      radial-gradient(circle at 82% 68%, rgba(220, 190, 215, 0.35) 0%, rgba(220, 190, 215, 0) 42%),
+      linear-gradient(180deg, #88829f 0%, #b9aec3 48%, #e8dfe5 100%);
+  }
+
+  body.dark {
+    background:
+      radial-gradient(circle at 50% 18%, rgba(125, 113, 165, 0.24) 0%, rgba(125, 113, 165, 0) 38%),
+      radial-gradient(circle at 18% 78%, rgba(88, 72, 115, 0.28) 0%, rgba(88, 72, 115, 0) 46%),
+      radial-gradient(circle at 82% 68%, rgba(112, 80, 130, 0.22) 0%, rgba(112, 80, 130, 0) 42%),
+      linear-gradient(180deg, #1b1830 0%, #2b263f 52%, #4a4059 100%);
+  }
+
+  #scene-container {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+  }
+
+  #scene-container canvas {
+    display: block;
+  }
+
+  #theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: var(--panel-light);
+    color: var(--text-light);
+    backdrop-filter: blur(8px);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  body.dark #theme-toggle {
+    background: var(--panel-dark);
+    color: var(--text-dark);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  #theme-toggle .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* แถบปุ่มลัดนำทางสำรวจวัตถุ 3D */
+  #quick-nav {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    max-width: calc(100vw - 150px);
+  }
+
+  .nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: var(--panel-light);
+    color: var(--text-light);
+    backdrop-filter: blur(8px);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: inherit;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+
+  .nav-btn:hover {
+    background: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  body.dark .nav-btn {
+    background: var(--panel-dark);
+    color: var(--text-dark);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  body.dark .nav-btn:hover {
+    background: #2a2a2e;
+  }
+
+  #loading-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 10;
+    font-size: 13px;
+    color: var(--text-light);
+    opacity: 0.6;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  body.dark #loading-hint {
+    color: var(--text-dark);
+  }
+
+  /* ป้ายข้อมูลเมื่อคลิก Object (ข้อ 8) */
+  #info-panel {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    z-index: 10;
+    background: var(--panel-light);
+    color: var(--text-light);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 16px;
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    max-width: 380px;
+    text-align: center;
+  }
+  #info-panel.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0px);
+  }
+  body.dark #info-panel {
+    background: var(--panel-dark);
+    color: var(--text-dark);
+    border-color: rgba(255,255,255,0.12);
+  }
+  #scene-container canvas.hovering { cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div id="scene-container"></div>
+
+<div id="quick-nav">
+  <button class="nav-btn" data-target="Monitor">🖥️ จอคอม</button>
+  <button class="nav-btn" data-target="Keyboard">⌨️ คีย์บอร์ด</button>
+  <button class="nav-btn" data-target="Desk_CoffeeMug">☕ แก้วกาแฟ</button>
+  <button class="nav-btn" data-target="Shelf_Trophy">🏆 ถ้วยรางวัล</button>
+  <button class="nav-btn" data-target="Shelf_Plant">🌿 ต้นไม้</button>
+  <button class="nav-btn" data-target="PictureFrame">🖼️ รูปโปรไฟล์</button>
+  <button class="nav-btn" data-target="SignBoard">📋 ข้อมูลนิสิต</button>
+  <button class="nav-btn" data-target="Fan_Head">💨 พัดลม</button>
+  <button class="nav-btn" data-target="Reset">🔄 มุมมองห้อง</button>
+</div>
+
+<button id="theme-toggle">
+  <span class="dot"></span>
+  <span id="theme-label">Light</span>
+</button>
+
+<div id="loading-hint">กำลังโหลดโมเดล...</div>
+<div id="info-panel"></div>
+
+<!--
+  โมเดล GLB อยู่โฟลเดอร์เดียวกับไฟล์ HTML
+-->
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+// ---------------------------------------------------------
+// ตั้งค่าตรงนี้ได้ตามใจ
+// ---------------------------------------------------------
+const MODEL_PATH =
+  "https://raw.githubusercontent.com/Githu9Phadol/Githu9Phadol.github.io/main/myport.glb";
+
+const THEME = {
+  light: {
+    bg: 0xf4f2fb,
+    fog: 0xf4f2fb,
+    ambient: 0xffffff,
+    ambientIntensity: 0.52,
+    directional: 0xfffbf2,
+    directionalIntensity: 1.30,
+    cloudColor: 0xffffff,
+    sun: 0xfff2c2,
+  },
+  dark: {
+    bg: 0x161526,
+    fog: 0x161526,
+    ambient: 0x4a4268,
+    ambientIntensity: 0.35,
+    directional: 0x7c6da8,
+    directionalIntensity: 0.35,
+    cloudColor: 0x3a3560,
+    sun: 0xcbd0ff,
+  },
+};
+
+let isDark = false;
+const clock = new THREE.Clock();
+
+// ---------------------------------------------------------
+// พื้นฐานฉาก: renderer, scene, camera
+// ---------------------------------------------------------
+const container = document.getElementById("scene-container");
+
+const renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  alpha: true,
+});
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = null;
+scene.fog = null;
+
+// ---------------------------------------------------------
+// ระบบแสงสะท้อนสตูดิโอเสมือนจริง (IBL Studio Environment Map)
+// หัวใจสำคัญของ PBR: โลหะ (Metalness: 1.0) ใน CG ไม่มี Diffuse
+// ต้องมีภาพสะท้อนแสงไฟสตูดิโอ (Softbox Highlights) สะท้อนบนเนื้อเหล็กเหมือนใน Blender
+// จึงจะดูเหมือนเหล็กจริง 100% ไม่มืดดำและไม่ดูเป็นพลาสติก
+// ---------------------------------------------------------
+function createStudioEnvironment(targetRenderer) {
+  const envScene = new THREE.Scene();
+
+  // กล่องสตูดิโอไล่ระดับแสง
+  const roomGeo = new THREE.BoxGeometry(14, 14, 14);
+  const roomMat = new THREE.MeshBasicMaterial({
+    color: 0x9aa2b4,
+    side: THREE.BackSide,
+  });
+  envScene.add(new THREE.Mesh(roomGeo, roomMat));
+
+  // แผงไฟ Softbox ด้านบน (Overhead Studio Light)
+  const topLight = new THREE.Mesh(
+    new THREE.PlaneGeometry(8, 8),
+    new THREE.MeshBasicMaterial({ color: 0xffffff })
+  );
+  topLight.position.set(0, 6.8, 0);
+  topLight.rotation.x = Math.PI / 2;
+  envScene.add(topLight);
+
+  // แผงไฟ Softbox ด้านหน้าขวา (Key Light Panel)
+  const keyLight = new THREE.Mesh(
+    new THREE.PlaneGeometry(5, 8),
+    new THREE.MeshBasicMaterial({ color: 0xffffff })
+  );
+  keyLight.position.set(6.8, 2.5, 3.0);
+  keyLight.rotation.y = -Math.PI / 2;
+  envScene.add(keyLight);
+
+  // แผงไฟ Softbox ด้านซ้าย (Fill Light Panel ส่องกระทบป้าย SignBoard และกรอบรูปตรงๆ)
+  const fillLight = new THREE.Mesh(
+    new THREE.PlaneGeometry(5, 8),
+    new THREE.MeshBasicMaterial({ color: 0xe8f0ff })
+  );
+  fillLight.position.set(-6.8, 2.5, -1.5);
+  fillLight.rotation.y = Math.PI / 2;
+  envScene.add(fillLight);
+
+  // แถบไฟขอบประกายด้านหลัง (Rim Glint Strip)
+  const rimLight = new THREE.Mesh(
+    new THREE.PlaneGeometry(9, 3),
+    new THREE.MeshBasicMaterial({ color: 0xffffff })
+  );
+  rimLight.position.set(0, 3.5, -6.8);
+  envScene.add(rimLight);
+
+  const pmremGen = new THREE.PMREMGenerator(targetRenderer);
+  const envTexture = pmremGen.fromScene(envScene, 0.04).texture;
+  pmremGen.dispose();
+  return envTexture;
+}
+
+scene.environment = createStudioEnvironment(renderer);
+
+const camera = new THREE.PerspectiveCamera(
+  40,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  100
+);
+camera.position.set(5, 3.5, -5);
+
+// จุดที่โมเดลของคุณจะถูกใส่เข้ามา
+const contentGroup = new THREE.Group();
+scene.add(contentGroup);
+
+// รายการวัตถุที่คลิกตรวจจับได้ (Raycaster Pickable Objects)
+let pickableObjects = [];
+
+// ---------------------------------------------------------
+// แสง
+// ---------------------------------------------------------
+const ambientLight = new THREE.AmbientLight(
+  THEME.light.ambient,
+  THEME.light.ambientIntensity
+);
+scene.add(ambientLight);
+
+const directionalLight = new THREE.DirectionalLight(
+  THEME.light.directional,
+  THEME.light.directionalIntensity
+);
+// แสงแดดส่องตรงเข้าห้องจากมุมเปิดด้านหน้า-ขวา (Front-Right Open Angle)
+directionalLight.position.set(3.2, 5.8, -3.0);
+directionalLight.target.position.set(0, 0.4, 0);
+scene.add(directionalLight);
+scene.add(directionalLight.target);
+
+// ระบบแผนที่เงาตกกระทบแบบเรียลไทม์ (Real-time Cast & Receive Shadow Maps)
+directionalLight.castShadow = true;
+directionalLight.shadow.mapSize.width = 2048;
+directionalLight.shadow.mapSize.height = 2048;
+directionalLight.shadow.camera.near = 0.5;
+directionalLight.shadow.camera.far = 16.0;
+directionalLight.shadow.camera.left = -3.2;
+directionalLight.shadow.camera.right = 3.2;
+directionalLight.shadow.camera.top = 3.2;
+directionalLight.shadow.camera.bottom = -3.2;
+directionalLight.shadow.bias = -0.0004;
+directionalLight.shadow.normalBias = 0.02;
+
+// ---------------------------------------------------------
+// วัตถุแสดงแหล่งกำเนิดแสง ให้เห็นว่าแสงมาจากไหนจริงๆ
+// ---------------------------------------------------------
+const lightSourceGeometry = new THREE.SphereGeometry(0.35, 24, 24);
+const lightSourceMaterial = new THREE.MeshBasicMaterial({
+  color: THEME.light.sun,
+  fog: false,
+});
+const lightSourceMesh = new THREE.Mesh(lightSourceGeometry, lightSourceMaterial);
+lightSourceMesh.position.copy(directionalLight.position);
+scene.add(lightSourceMesh);
+
+const lightGlowGeometry = new THREE.SphereGeometry(0.65, 24, 24);
+const lightGlowMaterial = new THREE.MeshBasicMaterial({
+  color: THEME.light.sun,
+  transparent: true,
+  opacity: 0.25,
+  fog: false,
+});
+const lightGlowMesh = new THREE.Mesh(lightGlowGeometry, lightGlowMaterial);
+lightGlowMesh.position.copy(directionalLight.position);
+scene.add(lightGlowMesh);
+
+// ---------------------------------------------------------
+// แสงสว่างจากโคมไฟตั้งโต๊ะ (Desk Lamp) และหลอดไฟนีออนติดผนัง (Lampbar)
+// จะเปิดทำงานเมื่อสลับเป็นโหมดกลางคืน (Night Mode)
+// ---------------------------------------------------------
+// 1. โคมไฟตั้งโต๊ะ (Desk Lamp):
+// หลอดไฟเรืองแสงจำลองที่หัวโคมไฟ เพื่อให้มองเห็นหัวโคมไฟสว่างชัดเจน
+const deskBulbMesh = new THREE.Mesh(
+  new THREE.SphereGeometry(0.035, 16, 16),
+  new THREE.MeshBasicMaterial({ color: 0xffd54f })
+);
+deskBulbMesh.position.set(-1.04, 1.01, 1.32);
+deskBulbMesh.visible = false;
+scene.add(deskBulbMesh);
+
+// ลำแสงสปอตไลต์วงแคบพอดีหน้าโต๊ะ (Tight Downward Beam ไม่มีวงแสงกว้างติดกำแพง)
+const deskLampLight = new THREE.SpotLight(0xffaa33, 0, 1.0, Math.PI / 7.0, 0.6, 1.0);
+deskLampLight.position.set(-1.04, 1.02, 1.32);
+deskLampLight.target.position.set(-0.95, 0.74, 1.22);
+scene.add(deskLampLight);
+scene.add(deskLampLight.target);
+
+// 2. หลอดไฟนีออนติดผนัง (Lampbar):
+// ลำแสงสปอตไลต์ส่องลงมาที่ผืนโต๊ะและจอคอม
+const lampBarLight = new THREE.SpotLight(0xfff5ea, 0, 3.2, Math.PI / 3, 0.95, 1.2);
+lampBarLight.position.set(-0.60, 1.65, 1.55);
+lampBarLight.target.position.set(-0.60, 0.72, 1.25);
+lampBarLight.castShadow = true;
+lampBarLight.shadow.mapSize.width = 1024;
+lampBarLight.shadow.mapSize.height = 1024;
+lampBarLight.shadow.camera.near = 0.1;
+lampBarLight.shadow.camera.far = 2.5;
+lampBarLight.shadow.bias = -0.001;
+scene.add(lampBarLight);
+scene.add(lampBarLight.target);
+
+// แสงกระจายตัวนุ่มนวล (Soft Diffuse Light Spread) กระจายแสงออกมารอบทิศทาง
+const barDiffuseLight = new THREE.PointLight(0xfff7ed, 0, 3.2, 1.6);
+barDiffuseLight.position.set(-0.60, 1.58, 1.40);
+scene.add(barDiffuseLight);
+
+// ออร่าเรืองแสงฟุ้งรอบตัวหลอดไฟ (Bloom / Glow Aura Effect)
+const barBloomGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.76, 24);
+barBloomGeo.rotateZ(Math.PI / 2);
+const barBloomMat = new THREE.ShaderMaterial({
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+  uniforms: {
+    uColor:   { value: new THREE.Color(0xfff7ed) },
+    uOpacity: { value: 0.0 },
+  },
+  vertexShader: `
+    varying vec3 vNormal;
+    varying vec3 vViewDir;
+    void main() {
+      vNormal = normalize(normalMatrix * normal);
+      vec4 worldPos = modelMatrix * vec4(position, 1.0);
+      vViewDir = normalize(cameraPosition - worldPos.xyz);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform vec3  uColor;
+    uniform float uOpacity;
+    varying vec3  vNormal;
+    varying vec3  vViewDir;
+    void main() {
+      float glow = pow(max(dot(vNormal, vViewDir), 0.0), 1.6) * uOpacity;
+      gl_FragColor = vec4(uColor, glow);
+    }
+  `,
+});
+const barBloomMesh = new THREE.Mesh(barBloomGeo, barBloomMat);
+barBloomMesh.position.set(-0.60, 1.70, 1.65);
+scene.add(barBloomMesh);
+
+// 3. แสงสปอตไลต์ส่องป้ายข้อมูลนิสิต SignBoard (Gallery Plaque Downlight)
+// ส่องแสงสีขาวนวลลงมาที่ป้าย เพื่อให้ตัวอักษรเหล็กสะท้อนแสงแวววาวและสว่างนวลตา
+const plaqueLight = new THREE.SpotLight(0xfff5ea, 1.4, 3.5, Math.PI / 3.5, 0.7, 1.2);
+plaqueLight.position.set(-1.00, 1.80, -1.035);
+plaqueLight.target.position.set(-1.63, 1.30, -1.035);
+scene.add(plaqueLight);
+scene.add(plaqueLight.target);
+
+let deskLampBulbMat = null;
+let lampBarMat = null;
+
+// ---------------------------------------------------------
+// เมฆ: หลายก้อน อยู่ในระยะที่เห็นชัด และขยับทันที
+// ---------------------------------------------------------
+function createCloud(scale) {
+  const cloud = new THREE.Group();
+
+  const material = new THREE.MeshStandardMaterial({
+    color: THEME.light.cloudColor,
+    roughness: 0.95,
+    metalness: 0,
+  });
+
+  const puffData = [
+    { x: 0.00, y: 0.00, z: 0.00, s: 1.10 },
+    { x: -0.72, y: -0.03, z: 0.02, s: 0.78 },
+    { x: 0.75, y: -0.03, z: 0.01, s: 0.82 },
+    { x: -0.30, y: 0.33, z: 0.00, s: 0.70 },
+    { x: 0.36, y: 0.29, z: -0.01, s: 0.67 },
+  ];
+
+  puffData.forEach((p) => {
+    const geometry = new THREE.SphereGeometry(0.62, 20, 16);
+    const puff = new THREE.Mesh(geometry, material);
+    puff.position.set(p.x, p.y, p.z);
+    puff.scale.set(p.s * 1.18, p.s * 0.78, p.s * 0.98);
+    cloud.add(puff);
+  });
+
+  cloud.scale.setScalar(scale);
+  cloud.rotation.y = (Math.random() - 0.5) * 0.35;
+  return cloud;
+}
+
+const clouds = [];
+
+// วางเมฆในบริเวณที่กล้องเห็นได้จริงรอบฉาก
+const cloudPositions = [
+  { x: -5.8, y: 4.8, z: 2.8, s: 0.95 },
+  { x: -3.8, y: 6.0, z: 5.0, s: 1.10 },
+  { x: -1.2, y: 5.0, z: 6.8, s: 0.82 },
+  { x: 1.8,  y: 6.2, z: 7.2, s: 1.05 },
+  { x: 4.6,  y: 5.4, z: 5.8, s: 0.92 },
+  { x: 6.2,  y: 4.5, z: 3.2, s: 1.08 },
+  { x: -6.2, y: 7.2, z: 7.8, s: 1.18 },
+  { x: -2.9, y: 7.8, z: 9.2, s: 0.88 },
+  { x: 2.7,  y: 7.6, z: 9.0, s: 1.16 },
+  { x: 6.0,  y: 7.0, z: 8.0, s: 0.86 },
+  { x: -7.0, y: 5.9, z: 11.0, s: 1.00 },
+  { x: 7.0,  y: 6.2, z: 11.2, s: 1.05 },
+  { x: -5.0, y: 8.6, z: 12.5, s: 0.90 },
+  { x: 4.8,  y: 8.4, z: 12.0, s: 1.12 },
+  { x: -8.0, y: 8.0, z: 5.5, s: 0.82 },
+  { x: 8.0,  y: 7.7, z: 5.8, s: 0.90 },
+];
+
+cloudPositions.forEach((pos, i) => {
+  const cloud = createCloud(pos.s);
+  cloud.position.set(pos.x, pos.y, pos.z);
+  cloud.userData.baseX = pos.x;
+  cloud.userData.baseY = pos.y;
+  cloud.userData.baseZ = pos.z;
+  cloud.userData.phase = i * 0.75;
+  cloud.userData.speed = 0.35 + (i % 4) * 0.08;
+  cloud.userData.driftX = 0.18 + (i % 3) * 0.08;
+  scene.add(cloud);
+  clouds.push(cloud);
+});
+
+// ---------------------------------------------------------
+// การควบคุมกล้อง OrbitControls (หมุนนุ่มนวล ซูมตรวจดูวัตถุใกล้ชิดได้เต็มที่)
+// ---------------------------------------------------------
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 1.0, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.enablePan = false;
+
+// อนุญาตให้ซูมเข้าใกล้เพื่อดูรายละเอียดวัตถุและเอฟเฟกต์ Shader ได้อย่างคมชัด (ระยะ 0.25 ม.)
+controls.minDistance = 0.25;
+controls.maxDistance = 14.0;
+
+// ปรับมุมก้ม-เงยได้อย่างเป็นธรรมชาติ มองระดับสายตาได้โดยไม่ชนเพดานหรือพื้น
+controls.minPolarAngle = THREE.MathUtils.degToRad(12);
+controls.maxPolarAngle = THREE.MathUtils.degToRad(86);
+
+controls.update();
+
+// ---------------------------------------------------------
+// โหลดโมเดล
+// ---------------------------------------------------------
+const loadingHint = document.getElementById("loading-hint");
+const infoPanel = document.getElementById("info-panel");
+const loader = new GLTFLoader();
+
+let fanHead = null;
+let fanBlades = null;
+
+// ---------------------------------------------------------
+// ข้อ 5: Cel Shading (สูตร Stepped Diffuse Week 3 ของอาจารย์)
+// เพิ่ม Dynamic View-Dependent Rim & Specular ที่เลื่อนตามมุมกล้องทันทีที่หมุนมุม!
+// ---------------------------------------------------------
+const celVertexShader = `
+  varying vec3 vNormalW;
+  varying vec3 vPosW;
+  void main() {
+    vec4 worldPos = modelMatrix * vec4(position, 1.0);
+    vPosW    = worldPos.xyz;
+    vNormalW = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+    gl_Position = projectionMatrix * viewMatrix * worldPos;
+  }
+`;
+
+const celFragmentShader = `
+  precision mediump float;
+  uniform vec3  uBaseColor;
+  uniform vec3  uShadowColor;
+  uniform vec3  uLightDir;
+  uniform float uLevels;       // จำนวนสเต็ปเงา (Stepped Diffuse)
+  uniform float uSpecular;     // แสงสะท้อน Toon Specular
+  uniform float uRimStrength;  // ความแรงของแสงขอบตามมุมกล้อง
+  uniform vec3  uRimColor;     // สีแสงขอบตามมุมกล้อง
+  uniform float uAmbient;      // แสงพื้นหลัง
+
+  varying vec3  vNormalW;
+  varying vec3  vPosW;
+
+  void main() {
+    vec3 N = normalize(vNormalW);
+    vec3 L = normalize(uLightDir);
+    vec3 V = normalize(cameraPosition - vPosW);
+
+    // 1. View-Coupled Lighting: ผสมมุมกล้องเข้ากับทิศทางแสง (หมุนกล้องนิดเดียว แสงเงาขั้นบันไดจะขยับตามทันที!)
+    vec3 lightVec = normalize(L + V * 0.55);
+    float diff = max(dot(N, lightVec), 0.0);
+    float toon = floor(diff * uLevels) / uLevels;
+
+    // ผสมสีเงากับสีสว่าง
+    float t = clamp(uAmbient + (1.0 - uAmbient) * toon, 0.0, 1.0);
+    vec3 col = mix(uShadowColor, uBaseColor, t);
+
+    // 2. Dynamic View-Dependent Rim Light (ขยายช่วงความไว หมุนนิดเดียวขอบแสงก็เลื่อนตามทันที)
+    float NdotV = max(dot(N, V), 0.0);
+    float rim = pow(1.0 - NdotV, 1.6);
+    float toonRim = smoothstep(0.25, 0.65, rim) * uRimStrength;
+
+    // 3. Dynamic Blinn-Phong Specular (แถบสะท้อนเงาที่ตอบสนองต่อการหมุนกล้องอย่างรวดเร็ว)
+    vec3 H = normalize(lightVec + V);
+    float NdotH = max(dot(N, H), 0.0);
+    float spec = pow(NdotH, 10.0);
+    float toonSpec = step(0.48, spec) * uSpecular;
+
+    vec3 finalColor = col + uRimColor * toonRim + vec3(toonSpec);
+    gl_FragColor = vec4(finalColor, 1.0);
+  }
+`;
+
+function createCelMat(baseHex, shadowHex, levels, specular = 0.35, rimStrength = 0.45, rimHex = 0xffffff, ambient = 0.30) {
+  return new THREE.ShaderMaterial({
+    vertexShader: celVertexShader,
+    fragmentShader: celFragmentShader,
+    uniforms: {
+      uBaseColor:    { value: new THREE.Color(baseHex) },
+      uShadowColor:  { value: new THREE.Color(shadowHex) },
+      uLightDir:     { value: new THREE.Vector3(3.2, 5.8, -3.0) },
+      uLevels:       { value: levels },
+      uSpecular:     { value: specular },
+      uRimStrength:  { value: rimStrength },
+      uRimColor:     { value: new THREE.Color(rimHex) },
+      uAmbient:      { value: ambient },
+    },
+  });
+}
+
+// 5 วัตถุ 5 สไตล์ Cel Shading คุมโทนห้องให้กลมกลืนแบบ Modern Minimalist:
+// 1. เก้าอี้ (Chair): สีชาร์โคลผ้าสรีรศาสตร์ 3 สเต็ปเงา + เส้นขอบเงินเทาหรูหรา
+const chairCelMaterial = createCelMat(0x2d323b, 0x16181d, 3.0, 0.20, 0.50, 0x94a3b8, 0.30);
+
+// 2. เคสคอมพิวเตอร์ (Computer): สีดำออบซิเดียนสไตล์ Stealth Gaming PC 3 สเต็ปเงา + ขอบแสงนีออนไซเบอร์
+const computerCelMaterial = createCelMat(0x23272f, 0x111317, 3.0, 0.45, 0.55, 0x38bdf8, 0.35);
+
+// 3. จอภาพ (Monitor): Cel Shading พิเศษ มองตรงจอสีฟ้าสดใส พอหันข้างเยอะๆ ตัดสเต็ปเป็นสีดำสนิท!
+const monitorVertexShader = `
+  varying vec3 vNormalW;
+  varying vec3 vPosW;
+  varying vec3 vLocalPos;
+  varying vec3 vLocalNormal;
+
+  void main() {
+    vLocalPos = position;
+    vLocalNormal = normal;
+    vec4 worldPos = modelMatrix * vec4(position, 1.0);
+    vPosW = worldPos.xyz;
+    vNormalW = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+    gl_Position = projectionMatrix * viewMatrix * worldPos;
+  }
+`;
+
+const monitorFragmentShader = `
+  precision mediump float;
+  uniform vec3  uBlueColor;    // สีฟ้าสดใสเมื่อมองตรง
+  uniform vec3  uBlackColor;   // สีดำสนิทเมื่อหันข้าง
+  uniform float uThreshold;    // เกณฑ์มุมมองสายตา (0.55 ทำให้เปลี่ยนเป็นดำได้ทันทีเมื่อหันข้าง ไม่ต้องเอียงสุดขอบ)
+  uniform vec3  uLightDir;
+
+  varying vec3  vNormalW;
+  varying vec3  vPosW;
+  varying vec3  vLocalPos;
+  varying vec3  vLocalNormal;
+
+  void main() {
+    vec3 N = normalize(vNormalW);
+    vec3 V = normalize(cameraPosition - vPosW);
+    vec3 L = normalize(uLightDir);
+
+    // ตรวจสอบว่าเป็นระนาบด้านหน้าของหน้าจอ
+    bool isFrontFace = (vLocalNormal.z < -0.8 && vLocalPos.z > -0.6 && vLocalPos.y > -0.55);
+
+    // สร้างกรอบขอบจอสีดำ (Bezel): ขอบซ้าย-ขวา ขอบบน และขอบล่าง
+    bool isBezel = (abs(vLocalPos.x) > 0.43 || vLocalPos.y > 0.43 || vLocalPos.y < -0.38);
+
+    if (isFrontFace && !isBezel) {
+      // 1. ผืนหน้าจอแสดงผลด้านใน (Display Screen Area):
+      float viewAlignment = max(dot(N, V), 0.0);
+
+      // Cel Shading ตัดขั้นสีตามมุมมองสายตา:
+      // มองตรง (viewAlignment > uThreshold) = จอสีฟ้าสดใส (Electric Blue)
+      // หันข้าง (viewAlignment <= uThreshold) = ตัดเป็นสีดำสนิททันที (Jet Black)
+      if (viewAlignment > uThreshold) {
+        // แถบแสงเงากระจก Toon Glint วิ่งกวาดพาดหน้าจอเวลาหมุนมุมมอง
+        vec3 H = normalize(L + V);
+        float spec = pow(max(dot(N, H), 0.0), 16.0);
+        float toonGlint = step(0.55, spec) * 0.35;
+
+        // ขอบเงาบางๆ ด้านใน (Inner Border Shadow) ให้ผืนจอดูมีมิติจมลงในกรอบจอ
+        float borderDistX = 0.43 - abs(vLocalPos.x);
+        float borderDistY = min(0.43 - vLocalPos.y, vLocalPos.y - (-0.38));
+        float innerShadow = smoothstep(0.0, 0.015, min(borderDistX, borderDistY));
+        vec3 screenCol = mix(vec3(0.02, 0.05, 0.10), uBlueColor, innerShadow);
+
+        gl_FragColor = vec4(screenCol + vec3(toonGlint), 1.0);
+      } else {
+        gl_FragColor = vec4(uBlackColor, 1.0);
+      }
+    } else {
+      // 2. ขอบจอ (Bezel Border), ฝาหลัง และขาตั้งจอ: โทน Slate Dark มินิมอล พร้อม Cel Shading 2 ระดับเงา
+      float diff = max(dot(N, L), 0.0);
+      float toon = step(0.35, diff);
+      vec3 bodyCol = mix(vec3(0.08, 0.09, 0.12), vec3(0.18, 0.20, 0.25), toon);
+
+      // เส้นขอบ Toon Rim Highlight บางๆ
+      float rim = pow(1.0 - max(dot(N, V), 0.0), 2.5);
+      bodyCol += vec3(0.12) * step(0.65, rim);
+
+      gl_FragColor = vec4(bodyCol, 1.0);
+    }
+  }
+`;
+
+const monitorCelMaterial = new THREE.ShaderMaterial({
+  vertexShader: monitorVertexShader,
+  fragmentShader: monitorFragmentShader,
+  uniforms: {
+    uBlueColor:  { value: new THREE.Color(0x0ea5e9) }, // ฟ้าสดใส Electric Cyan Blue
+    uBlackColor: { value: new THREE.Color(0x0a0c10) }, // ดำสนิท Jet Black
+    uThreshold:  { value: 0.55 },                      // เกณฑ์มุมมองสายตา (เอียงข้างปุ๊บตัดดำทันที)
+    uLightDir:   { value: new THREE.Vector3(3.2, 5.8, -3.0) },
+  },
+});
+
+// 4. คีย์บอร์ด (Keyboard): คีย์บอร์ดกลไกคัสตอม สีครีมอบอุ่นตัดบอดี้สเลตเกรย์ 4 สเต็ปเงา + ขอบประกายสีอำพัน
+const keyboardCelMaterial = createCelMat(0xeae4d8, 0x3e424b, 4.0, 0.30, 0.45, 0xf59e0b, 0.32);
+
+// 5. เมาส์ (Mouse): เมาส์ไร้สายสีดาร์กชาร์โคลด้าน 3 สเต็ปเงา + แสงไฮไลต์สีเมทัลลิก
+const mouseCelMaterial = createCelMat(0x2d323b, 0x16181d, 3.0, 0.60, 0.50, 0x64748b, 0.30);
+
+// ---------------------------------------------------------
+// ข้อ 6: Real-time Vertex Shader displacement (2 คะแนน)
+// ใส่บน Shelf_Trophy (ถ้วยรางวัลบนชั้นวาง) ให้เปล่งประกายและกระเพื่อมแสงแบบเรียลไทม์
+// ---------------------------------------------------------
+const trophyUniforms = {
+  uTime:       { value: 0.0 },
+  uBaseColor:  { value: new THREE.Color(0xfbbf24) }, // Gold
+};
+
+const trophyVertexShader = `
+  uniform float uTime;
+  varying vec3  vNormal;
+  varying vec3  vViewDir;
+  varying float vDisp;
+
+  void main() {
+    vNormal = normalize(normalMatrix * normal);
+    vec4 worldPos = modelMatrix * vec4(position, 1.0);
+    vViewDir = normalize(cameraPosition - worldPos.xyz);
+
+    // คลื่นระลอกโลหะทองคำกระเพื่อมรอบพื้นผิวถ้วยรางวัล
+    float disp = sin(position.y * 18.0 + uTime * 3.5) * 0.028
+               + cos(position.x * 20.0 + uTime * 2.5) * 0.018;
+
+    vec3 newPos = position + normal * disp;
+    vDisp = disp;
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
+  }
+`;
+
+const trophyFragmentShader = `
+  uniform vec3  uBaseColor;
+  varying vec3  vNormal;
+  varying vec3  vViewDir;
+  varying float vDisp;
+
+  void main() {
+    float rim = pow(1.0 - max(dot(vNormal, vViewDir), 0.0), 2.0);
+    vec3 col = uBaseColor + vec3(rim * 0.7) + vec3(vDisp * 7.0);
+    gl_FragColor = vec4(col, 1.0);
+  }
+`;
+
+const trophyMaterial = new THREE.ShaderMaterial({
+  vertexShader:   trophyVertexShader,
+  fragmentShader: trophyFragmentShader,
+  uniforms:       trophyUniforms,
+  side:           THREE.DoubleSide,
+});
+
+// ---------------------------------------------------------
+// ข้อ 6 (ชิ้นที่ 2): Real-time Vertex Shader บนใบไม้ต้นไม้ (Shelf_Plant)
+// เทคนิค Foliage Wind Swaying ดัดยอดใบไม้ให้พริ้วไหวตามแรงลมของพัดลม
+// ---------------------------------------------------------
+const plantUniforms = {
+  uTime:      { value: 0.0 },
+  uBaseColor: { value: new THREE.Color(0x2d6a4f) }, // Dark Forest Green
+  uTipColor:  { value: new THREE.Color(0x52b788) }, // Fresh Leaf Green
+};
+
+const plantVertexShader = `
+  uniform float uTime;
+  varying vec3  vNormal;
+  varying vec3  vViewDir;
+  varying float vWave;
+
+  void main() {
+    vNormal = normalize(normalMatrix * normal);
+    vec4 worldPos = modelMatrix * vec4(position, 1.0);
+    vViewDir = normalize(cameraPosition - worldPos.xyz);
+
+    // ยอดใบไม้พลิ้วไหวตามแรงลมของพัดลมอย่างชัดเจนและมีชีวิตชีวา
+    float heightFactor = clamp((position.y - 0.08) / 0.14, 0.0, 1.0);
+    float wind = sin(uTime * 3.5 + position.x * 20.0) * 0.040 * heightFactor;
+    float windFlutter = cos(uTime * 5.5 + position.z * 30.0) * 0.020 * heightFactor;
+
+    vec3 displacedPos = position;
+    displacedPos.x += wind + windFlutter;
+    displacedPos.z += wind * 0.75;
+    vWave = wind;
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(displacedPos, 1.0);
+  }
+`;
+
+const plantFragmentShader = `
+  uniform vec3 uBaseColor;
+  uniform vec3 uTipColor;
+  varying vec3 vNormal;
+  varying vec3 vViewDir;
+  varying float vWave;
+
+  void main() {
+    vec3 L = normalize(vec3(3.2, 5.8, -3.0));
+    float diff = max(dot(vNormal, L), 0.0);
+    float toon = smoothstep(0.2, 0.5, diff);
+    vec3 col = mix(uBaseColor, uTipColor, toon + vWave * 6.0);
+
+    // Rim highlight แสงสะท้อนขอบใบไม้
+    float rim = pow(1.0 - max(dot(vNormal, vViewDir), 0.0), 2.5);
+    col += vec3(0.25, 0.40, 0.20) * rim;
+
+    gl_FragColor = vec4(col, 1.0);
+  }
+`;
+
+const plantMaterial = new THREE.ShaderMaterial({
+  vertexShader:   plantVertexShader,
+  fragmentShader: plantFragmentShader,
+  uniforms:       plantUniforms,
+  side:           THREE.DoubleSide,
+});
+
+// ---------------------------------------------------------
+// ข้อ 6 (ชิ้นที่ 3): Real-time Vertex Shader บนผิวน้ำกาแฟ (Desk_CoffeeMug)
+// เทคนิค Liquid Surface Ripple ดัดผิวน้ำกาแฟกระเพื่อมเป็นระลอกคลื่นน้ำไดนามิก
+// ---------------------------------------------------------
+const coffeeUniforms = {
+  uTime:        { value: 0.0 },
+  uCoffeeColor: { value: new THREE.Color(0x3d2314) }, // Rich Roasted Coffee
+};
+
+const coffeeVertexShader = `
+  uniform float uTime;
+  varying vec3  vNormal;
+  varying vec3  vViewDir;
+  varying float vWave;
+
+  void main() {
+    vNormal = normalize(normalMatrix * normal);
+    vec4 worldPos = modelMatrix * vec4(position, 1.0);
+    vViewDir = normalize(cameraPosition - worldPos.xyz);
+
+    // ระลอกคลื่นน้ำกาแฟกระเพื่อมจากศูนย์กลางออกไปด้านนอกอย่างชัดเจน
+    float dist = length(position.xz);
+    float wave = sin(dist * 140.0 - uTime * 6.0) * 0.0055
+               + cos(position.x * 90.0 + uTime * 4.0) * 0.0035;
+
+    vec3 newPos = position;
+    newPos.y += wave;
+    vWave = wave;
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
+  }
+`;
+
+const coffeeFragmentShader = `
+  uniform vec3 uCoffeeColor;
+  varying vec3 vNormal;
+  varying vec3 vViewDir;
+  varying float vWave;
+
+  void main() {
+    vec3 L = normalize(vec3(3.2, 5.8, -3.0));
+    vec3 H = normalize(L + vViewDir);
+    float spec = pow(max(dot(vNormal, H), 0.0), 16.0);
+
+    // ประกายระลอกคลื่นน้ำกาแฟ + แสงสะท้อนแวววาว
+    vec3 col = uCoffeeColor + vec3(vWave * 45.0);
+    col += vec3(0.55, 0.42, 0.30) * spec * 2.2;
+
+    gl_FragColor = vec4(col, 1.0);
+  }
+`;
+
+const coffeeMaterial = new THREE.ShaderMaterial({
+  vertexShader:   coffeeVertexShader,
+  fragmentShader: coffeeFragmentShader,
+  uniforms:       coffeeUniforms,
+  side:           THREE.DoubleSide,
+});
+
+// ---------------------------------------------------------
+// ระบบควันไอร้อนลอยละมุนเหนือแก้วกาแฟ (Coffee Steam Particle System)
+// ---------------------------------------------------------
+function createCoffeeSteamTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d");
+  const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grad.addColorStop(0.0, "rgba(255, 255, 255, 0.95)");
+  grad.addColorStop(0.2, "rgba(250, 248, 245, 0.65)");
+  grad.addColorStop(0.5, "rgba(240, 235, 230, 0.22)");
+  grad.addColorStop(0.8, "rgba(230, 225, 220, 0.05)");
+  grad.addColorStop(1.0, "rgba(255, 255, 255, 0.0)");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 64, 64);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.needsUpdate = true;
+  return tex;
+}
+
+const steamCount = 42;
+const steamLifetime = 2.4;
+const steamPositions = new Float32Array(steamCount * 3);
+const steamBirth = new Float32Array(steamCount);
+const steamSeed = new Float32Array(steamCount * 3);
+
+for (let i = 0; i < steamCount; i++) {
+  steamPositions[i * 3 + 0] = -0.25;
+  steamPositions[i * 3 + 1] = 0.825;
+  steamPositions[i * 3 + 2] = 1.15;
+  steamBirth[i] = (i / steamCount) * steamLifetime;
+  steamSeed[i * 3 + 0] = i * 1.618;
+  steamSeed[i * 3 + 1] = 0.006 + (i % 5) * 0.0035;
+  steamSeed[i * 3 + 2] = (i * 2.39996) % (Math.PI * 2);
+}
+
+const steamGeo = new THREE.BufferGeometry();
+steamGeo.setAttribute("position", new THREE.BufferAttribute(steamPositions, 3));
+steamGeo.setAttribute("aBirth", new THREE.BufferAttribute(steamBirth, 1));
+steamGeo.setAttribute("aSeed", new THREE.BufferAttribute(steamSeed, 3));
+
+const steamUniforms = {
+  uTime:     { value: 0.0 },
+  uLifetime: { value: steamLifetime },
+  uTexture:  { value: createCoffeeSteamTexture() },
+  uColor:    { value: new THREE.Color(0xfbf6ee) },
+};
+
+const steamVertexShader = `
+  uniform float uTime;
+  uniform float uLifetime;
+  attribute float aBirth;
+  attribute vec3 aSeed;
+  varying float vAlpha;
+
+  void main() {
+    float phase = aSeed.x;
+    float baseR = aSeed.y;
+    float baseA = aSeed.z;
+
+    // คำนวณช่วงอายุละอองควัน 0.0 ถึง 1.0
+    float age = mod(uTime - aBirth, uLifetime) / uLifetime;
+
+    // ลอยตัวขึ้นในแนวดิ่ง เหนือปากแก้วกาแฟ
+    float y = 0.825 + age * 0.22;
+
+    // การม้วนตัวตามแรงพาความร้อนธรรมชาติ
+    float currentAngle = baseA + age * 2.2 + sin(uTime * 1.2 + phase) * 0.35;
+    float currentRadius = baseR * (1.0 + age * 1.6);
+    float drift = sin(age * 3.14159) * 0.012;
+
+    float x = -0.25 + currentRadius * cos(currentAngle) + drift * sin(uTime + phase);
+    float z =  1.15 + currentRadius * sin(currentAngle) + drift * cos(uTime + phase);
+
+    vec4 mvPosition = modelViewMatrix * vec4(x, y, z, 1.0);
+    gl_Position = projectionMatrix * mvPosition;
+
+    // ขนาดละอองค่อยๆ ขยายตัวตามระยะความสูง และปรับตามระยะทางกล้อง
+    float pSize = (14.0 + age * 26.0) * (300.0 / -mvPosition.z);
+    gl_PointSize = clamp(pSize, 4.0, 80.0);
+
+    // ความโปร่งแสง ค่อยๆ ลอยขึ้นมา และจางหายไปอย่างละมุน
+    vAlpha = smoothstep(0.0, 0.22, age) * (1.0 - smoothstep(0.55, 1.0, age)) * 0.30;
+  }
+`;
+
+const steamFragmentShader = `
+  uniform sampler2D uTexture;
+  uniform vec3 uColor;
+  varying float vAlpha;
+
+  void main() {
+    vec4 tex = texture2D(uTexture, gl_PointCoord);
+    float alpha = tex.a * vAlpha;
+    if (alpha < 0.005) discard;
+    gl_FragColor = vec4(uColor, alpha);
+  }
+`;
+
+const steamMaterial = new THREE.ShaderMaterial({
+  vertexShader:   steamVertexShader,
+  fragmentShader: steamFragmentShader,
+  uniforms:       steamUniforms,
+  transparent:    true,
+  depthWrite:     false,
+  blending:       THREE.NormalBlending,
+});
+
+const coffeeSteam = new THREE.Points(steamGeo, steamMaterial);
+coffeeSteam.name = "CoffeeSteam";
+contentGroup.add(coffeeSteam);
+// หมายเหตุ: ละอองควันเป็นอนุภาคโปร่งแสง ไม่ใส่ใน pickableObjects เพื่อไม่ให้บังการคลิกคีย์บอร์ดและโต๊ะทำงาน
+
+// ---------------------------------------------------------
+// ผนังระแนงไม้โมเดิร์น (Modern Acoustic Wood Slat Wall Paneling)
+// ---------------------------------------------------------
+function createWoodSlatTextures() {
+  const w = 1024, h = 1024;
+
+  // 1. Diffuse Map (ระแนงไม้สีโอ๊คอบอุ่น พร้อมร่องซับเสียงสีดำแอนทราไซต์)
+  const diffCanvas = document.createElement("canvas");
+  diffCanvas.width = w; diffCanvas.height = h;
+  const ctx = diffCanvas.getContext("2d");
+
+  // 2. Bump Map (มิติร่องลึก 3D ชัดเจนสมจริง)
+  const bumpCanvas = document.createElement("canvas");
+  bumpCanvas.width = w; bumpCanvas.height = h;
+  const bCtx = bumpCanvas.getContext("2d");
+
+  // พื้นหลังร่องซับเสียงสีดำแอนทราไซต์ (Dark Acoustic Felt Backing)
+  ctx.fillStyle = "#18181b";
+  ctx.fillRect(0, 0, w, h);
+
+  bCtx.fillStyle = "#151515";
+  bCtx.fillRect(0, 0, w, h);
+
+  const numSlats = 16;
+  const pitch = w / numSlats;   // 64px
+  const grooveW = 16;           // 16px
+  const slatW = pitch - grooveW; // 48px
+
+  let seed = 123;
+  function rnd() {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  }
+
+  for (let i = 0; i < numSlats; i++) {
+    const x0 = i * pitch + grooveW / 2;
+    const x1 = x0 + slatW;
+
+    // สีไม้โอ๊คธรรมชาติแต่ละแผ่น (Warm Honey Oak)
+    const baseR = 192 + Math.floor(rnd() * 16);
+    const baseG = 142 + Math.floor(rnd() * 14);
+    const baseB =  92 + Math.floor(rnd() * 12);
+
+    const grad = ctx.createLinearGradient(x0, 0, x1, 0);
+    grad.addColorStop(0.0, `rgb(${baseR + 10}, ${baseG + 8}, ${baseB + 6})`);
+    grad.addColorStop(0.2, `rgb(${baseR + 3},  ${baseG + 2},  ${baseB + 2})`);
+    grad.addColorStop(0.7, `rgb(${baseR},      ${baseG},      ${baseB})`);
+    grad.addColorStop(1.0, `rgb(${baseR - 16}, ${baseG - 12}, ${baseB - 8})`);
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(x0, 0, slatW, h);
+
+    // เส้นเสี้ยนลายไม้แนวตั้ง (Vertical Wood Grain)
+    const numGrains = 6 + Math.floor(rnd() * 5);
+    for (let g = 0; g < numGrains; g++) {
+      const gx = x0 + 3 + rnd() * (slatW - 6);
+      const gw = 1.0 + rnd() * 2.0;
+      const gAlpha = 0.04 + rnd() * 0.08;
+      const darkGrain = rnd() > 0.4;
+      ctx.fillStyle = darkGrain
+        ? `rgba(60, 35, 15, ${gAlpha})`
+        : `rgba(240, 205, 160, ${gAlpha * 0.8})`;
+      ctx.fillRect(gx, 0, gw, h);
+    }
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
+    ctx.fillRect(x1 - 1, 0, 1, h);
+
+    // Bump Map
+    const bGrad = bCtx.createLinearGradient(x0, 0, x1, 0);
+    bGrad.addColorStop(0.0, "#707070");
+    bGrad.addColorStop(0.12, "#e8e8e8");
+    bGrad.addColorStop(0.88, "#e8e8e8");
+    bGrad.addColorStop(1.0, "#606060");
+
+    bCtx.fillStyle = bGrad;
+    bCtx.fillRect(x0, 0, slatW, h);
+
+    bCtx.fillStyle = "#f0f0f0";
+    bCtx.fillRect(x0 + 2, 0, slatW - 4, h);
+  }
+
+  const diffTex = new THREE.CanvasTexture(diffCanvas);
+  diffTex.wrapS = THREE.RepeatWrapping;
+  diffTex.wrapT = THREE.RepeatWrapping;
+  diffTex.repeat.set(4.0, 1.0);
+
+  const bumpTex = new THREE.CanvasTexture(bumpCanvas);
+  bumpTex.wrapS = THREE.RepeatWrapping;
+  bumpTex.wrapT = THREE.RepeatWrapping;
+  bumpTex.repeat.set(4.0, 1.0);
+
+  return { diffTex, bumpTex };
+}
+
+const { diffTex: woodSlatDiffTex, bumpTex: woodSlatBumpTex } = createWoodSlatTextures();
+
+// ผนังระแนงไม้โอ๊คโมเดิร์นด้านในห้อง
+const wallMaterial = new THREE.MeshStandardMaterial({
+  map:             woodSlatDiffTex,
+  bumpMap:         woodSlatBumpTex,
+  bumpScale:       0.022,
+  roughness:       0.68,
+  metalness:       0.02,
+  envMapIntensity: 0.8,
+});
+
+// พื้นห้องสีคอนกรีตไมโครซีเมนต์นวลตาสไตล์สแกนดิเนเวีย
+const floorMaterial = new THREE.MeshStandardMaterial({
+  color:           0xd2cbc0,
+  roughness:       0.62,
+  metalness:       0.03,
+  envMapIntensity: 0.7,
+});
+
+// เปลือกนอกผนังและขอบตัดห้องสถาปัตยกรรม (Architectural Shell Border คมกริบ ไร้รอยยืด)
+const exteriorMaterial = new THREE.MeshStandardMaterial({
+  color:           0xedeae4,
+  roughness:       0.85,
+  metalness:       0.01,
+});
+
+// โต๊ะและชั้นวางของไม้โอ๊คทองธรรมชาติ (Natural Honey Oak)
+const woodFurnitureMaterial = new THREE.MeshStandardMaterial({
+  color:           0xc89860,
+  roughness:       0.55,
+  metalness:       0.02,
+  envMapIntensity: 0.9,
+});
+
+// พื้นพรมทอเส้นใยธรรมชาติสไตล์สแกนดิเนเวีย (Woven Fabric Rug)
+function createWovenRugTexture() {
+  const c = document.createElement("canvas");
+  c.width = 512; c.height = 512;
+  const ctx = c.getContext("2d");
+  const g = ctx.createRadialGradient(256, 256, 30, 256, 256, 256);
+  g.addColorStop(0.00, "#f7f3ec");
+  g.addColorStop(0.80, "#ece5da");
+  g.addColorStop(0.93, "#dfd5c4");
+  g.addColorStop(1.00, "#cdbeaa");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 512, 512);
+
+  for (let r = 18; r < 250; r += 14) {
+    ctx.strokeStyle = "rgba(160, 140, 120, 0.16)";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(256, 256, r, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  return new THREE.CanvasTexture(c);
+}
+
+const rugMaterial = new THREE.MeshStandardMaterial({
+  map:             createWovenRugTexture(),
+  color:           0xfaf7f2,
+  roughness:       0.95,
+  metalness:       0.0,
+});
+
+// พัดลมตั้งพื้นสีสตูดิโอชาร์โคล
+const fanBodyMaterial = new THREE.MeshStandardMaterial({
+  color:           0x2e3238,
+  metalness:       0.75,
+  roughness:       0.25,
+  envMapIntensity: 1.4,
+});
+// ข้อ 3: Photo texture ของผู้จัดทำบน PictureFrame (1 คะแนน)
+// ---------------------------------------------------------
+function createAvatarTexture() {
+  const c = document.createElement("canvas");
+  c.width = 512;
+  c.height = 512;
+  const ctx = c.getContext("2d");
+
+  // พื้นหลังเกรเดียนต์มินิมอล
+  const g = ctx.createLinearGradient(0, 0, 512, 512);
+  g.addColorStop(0, "#475569");
+  g.addColorStop(1, "#1e293b");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 512, 512);
+
+  // กรอบใน
+  ctx.strokeStyle = "#94a3b8";
+  ctx.lineWidth = 12;
+  ctx.strokeRect(24, 24, 464, 464);
+
+  // วงกลมรูปโปรไฟล์
+  ctx.beginPath();
+  ctx.arc(256, 210, 110, 0, Math.PI * 2);
+  ctx.fillStyle = "#a855f7";
+  ctx.fill();
+
+  // ไอคอนคน
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(256, 185, 48, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(256, 315, 80, Math.PI, 0, false);
+  ctx.fill();
+
+  // ข้อความใต้รูป
+  ctx.fillStyle = "#f8fafc";
+  ctx.font = "bold 26px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("STUDENT PROFILE", 256, 395);
+
+  ctx.font = "18px sans-serif";
+  ctx.fillStyle = "#94a3b8";
+  ctx.fillText("Computer Graphics Lab", 256, 430);
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+// ---------------------------------------------------------
+// ข้อ 8: 3D Interaction / Picking (Raycaster)
+// คลิกที่ป้าย, จอคอม, รูป, หรือถ้วยรางวัลแล้วกล้องค่อย ๆ Lerp เข้าไปดู
+// ---------------------------------------------------------
+const raycaster   = new THREE.Raycaster();
+const mouse       = new THREE.Vector2();
+const canvas      = renderer.domElement;
+
+// เป้าหมายกล้อง (เลื่อนนุ่มนวลด้วย lerp)
+const camTarget     = new THREE.Vector3().copy(camera.position);
+const lookTarget    = new THREE.Vector3().copy(controls.target);
+const lerpStartCam  = new THREE.Vector3().copy(camera.position);
+const lerpStartLook = new THREE.Vector3().copy(controls.target);
+let isLerping     = false;
+let lerpProgress  = 1.0;
+
+function focusTarget(targetCam, targetLook, text) {
+  lerpStartCam.copy(camera.position);
+  lerpStartLook.copy(controls.target);
+  camTarget.copy(targetCam);
+  lookTarget.copy(targetLook);
+  lerpProgress = 0;
+  isLerping = true;
+  if (text) showInfo(text);
+}
+
+// ข้อมูลแต่ละ Object ที่คลิกได้ (มุมกล้องซูมเข้าโฟกัสวัตถุพอดี และเขียนชื่อเทคนิค CG ตรงๆ ไม่มีวงเล็บ)
+const PICK_INFO = {
+  "Monitor":             { cam: new THREE.Vector3(-0.60, 1.10, 0.95),  look: new THREE.Vector3(-0.60, 1.02, 1.625), text: "🖥️ Monitor — เทคนิค View-Angle Cel Shading สลับจอสีฟ้าเป็นดำตามมุมมองสายตา" },
+  "Computer":            { cam: new THREE.Vector3(0.40, 1.20, 0.85),   look: new THREE.Vector3(-0.05, 1.02, 1.325), text: "💻 Computer — เทคนิค Cel Shading แบบ Stepped Lambertian 3 ระดับเงา" },
+  "Keyboard":            { cam: new THREE.Vector3(-0.60, 1.12, 0.80),  look: new THREE.Vector3(-0.60, 0.78, 1.175), text: "⌨️ Keyboard — เทคนิค Cel Shading สไตล์ Pop-Art Toon 4 ระดับเงา" },
+  "Mouse":               { cam: new THREE.Vector3(-1.039, 1.05, 0.90), look: new THREE.Vector3(-1.039, 0.76, 1.175), text: "🖱️ Mouse — เทคนิค Cel Shading แบบ Blinn-Phong ร่วมกับ Fresnel Rim" },
+  "Chair":               { cam: new THREE.Vector3(0.10, 0.95, -0.05),  look: new THREE.Vector3(-0.60, 0.55, 0.575), text: "🪑 Chair — เทคนิค Toon Shading สไตล์ Soft Fabric 3 ระดับเงา" },
+  "Shelf_Trophy":        { cam: new THREE.Vector3(-0.95, 1.82, 1.302), look: new THREE.Vector3(-1.525, 1.78, 1.302), text: "🏆 Trophy — เทคนิค Real-time Vertex Shader คลื่นระลอกโลหะทองคำ Surface Wave Displacement" },
+  "Shelf_Plant":         { cam: new THREE.Vector3(-0.95, 1.82, 1.132), look: new THREE.Vector3(-1.525, 1.78, 1.132), text: "🌿 Plant — ไม้ประดับบนชั้นวางพร้อมเทคนิค Real-time Vertex Shader ยอดใบไม้พลิ้วไหว Foliage Wind Swaying" },
+  "Desk_CoffeeMug":      { cam: new THREE.Vector3(-0.25, 1.05, 0.90),  look: new THREE.Vector3(-0.25, 0.79, 1.150), text: "☕ Coffee Mug — แก้วกาแฟร้อนพร้อมเทคนิค Real-time Vertex Shader ผิวน้ำกระเพื่อม และระบบควันไอร้อนลอยละมุน Coffee Steam Simulation" },
+  "PictureFrame":        { cam: new THREE.Vector3(-0.75, 1.70, 0.00),  look: new THREE.Vector3(-1.65, 1.70, 0.00), text: "🖼️ Picture Frame — เทคนิค Texture Mapping รูปโปรไฟล์นักศึกษา" },
+  "Desk_Lamp":           { cam: new THREE.Vector3(-0.75, 1.10, 0.95),  look: new THREE.Vector3(-1.15, 0.90, 1.45), text: "💡 Desk Lamp — โคมไฟตั้งโต๊ะ ส่องแสงสีส้มอบอุ่นยามค่ำคืน" },
+  "Lampbar":             { cam: new THREE.Vector3(-0.60, 1.65, 0.95),  look: new THREE.Vector3(-0.60, 1.70, 1.65), text: "💡 Lamp Bar — หลอดไฟนีออนติดผนังส่องสว่างโต๊ะทำงาน" },
+  "SignBoard":           { cam: new THREE.Vector3(-0.55, 1.30, -1.035), look: new THREE.Vector3(-1.634, 1.30, -1.035), text: "📋 ข้อมูลนิสิต — ภาดล อาจหาญศิริ รหัส 6721651670 ภาควิชาวิทยาการคำนวณและเทคโนโลยีดิจิทัล คณะศิลปศาสตร์และวิทยาศาสตร์ มหาวิทยาลัยเกษตรศาสตร์" },
+  "StudentInfo_3DText":  { cam: new THREE.Vector3(-0.55, 1.30, -1.035), look: new THREE.Vector3(-1.634, 1.30, -1.035), text: "📋 ข้อมูลนิสิต — ภาดล อาจหาญศิริ รหัส 6721651670 ภาควิชาวิทยาการคำนวณและเทคโนโลยีดิจิทัล คณะศิลปศาสตร์และวิทยาศาสตร์ มหาวิทยาลัยเกษตรศาสตร์" },
+  "Cabinet":             { cam: new THREE.Vector3(0.65, 0.65, 0.65),   look: new THREE.Vector3(0.33, 0.38, 1.325), text: "🗄️ Cabinet — ตู้ลิ้นชักไม้โอ๊คมินิมอลพร้อมมือจับสเตนเลสสำหรับเก็บอุปกรณ์ไอที" },
+  "Headphones":          { cam: new THREE.Vector3(0.65, 1.05, 0.80),   look: new THREE.Vector3(0.33, 0.85, 1.325), text: "🎧 Headphones — หูฟังครอบหูสตูดิโอบนแท่นวางโลหะข้างโต๊ะทำงาน" },
+  "Table":               { cam: new THREE.Vector3(0.10, 1.25, 0.60),   look: new THREE.Vector3(-0.60, 0.75, 1.325), text: "🪵 Desk — โต๊ะทำงานไม้โอ๊คทองสไตล์สแกนดิเนเวียพร้อมพื้นที่จัดวางเซ็ตอุปกรณ์ไอที" },
+  "Shelf":               { cam: new THREE.Vector3(-0.95, 1.82, 1.20),  look: new THREE.Vector3(-1.525, 1.70, 1.20), text: "📚 Shelf — ชั้นวางของไม้โอ๊คตกแต่งหนังสือ ไม้ประดับ และถ้วยรางวัล" },
+  "Shelf_BooksFlat":     { cam: new THREE.Vector3(-0.95, 1.82, 1.20),  look: new THREE.Vector3(-1.525, 1.70, 1.20), text: "📚 Shelf — ชั้นวางของไม้โอ๊คตกแต่งหนังสือ ไม้ประดับ และถ้วยรางวัล" },
+  "Shelf_BooksStanding": { cam: new THREE.Vector3(-0.95, 1.82, 1.20),  look: new THREE.Vector3(-1.525, 1.70, 1.20), text: "📚 Shelf — ชั้นวางของไม้โอ๊คตกแต่งหนังสือ ไม้ประดับ และถ้วยรางวัล" },
+  "Shelf_Mug":           { cam: new THREE.Vector3(-0.95, 1.82, 1.20),  look: new THREE.Vector3(-1.525, 1.70, 1.20), text: "📚 Shelf — ชั้นวางของไม้โอ๊คตกแต่งหนังสือ ไม้ประดับ และถ้วยรางวัล" },
+  "Room_Rug":            { cam: new THREE.Vector3(0.50, 1.10, -0.10),  look: new THREE.Vector3(-0.60, 0.10, 0.75),  text: "🧶 Rug — พรมปูพื้นทอเส้นใยธรรมชาติโทนสีโอ๊ตมีลสไตล์นอร์ดิก" },
+  "Fan_Base":            { cam: new THREE.Vector3(1.20, 1.15, -1.25),  look: new THREE.Vector3(1.20, 0.95, -0.30), text: "💨 Fan — พัดลมตั้งพื้นหมุนส่ายและใบพัดหมุนติ้วด้วย Procedural Animation" },
+  "Fan_Head":            { cam: new THREE.Vector3(1.20, 1.15, -1.25),  look: new THREE.Vector3(1.20, 0.95, -0.30), text: "💨 Fan — พัดลมตั้งพื้นหมุนส่ายและใบพัดหมุนติ้วด้วย Procedural Animation" },
+  "Fan_Blades":          { cam: new THREE.Vector3(1.20, 1.15, -1.25),  look: new THREE.Vector3(1.20, 0.95, -0.30), text: "💨 Fan — พัดลมตั้งพื้นหมุนส่ายและใบพัดหมุนติ้วด้วย Procedural Animation" },
+};
+
+let panelTimer = null;
+
+function showInfo(text) {
+  clearTimeout(panelTimer);
+  infoPanel.textContent = text;
+  infoPanel.classList.add("visible");
+  panelTimer = setTimeout(() => infoPanel.classList.remove("visible"), 4500);
+}
+
+function onModelLoaded(gltf) {
+  contentGroup.add(gltf.scene);
+  loadingHint.style.display = "none";
+
+  gltf.scene.traverse((child) => {
+    // พัดลม (ตรวจหาทั้ง Group และ Mesh เพื่อให้ตรวจเจอแน่นอน)
+    if (child.name === "Fan_Head" || child.name.includes("Fan_Head")) {
+      fanHead = child;
+      pickableObjects.push(child);
+    }
+    if (child.name === "Fan_Blades" || child.name.includes("Fan_Blades")) {
+      fanBlades = child;
+      pickableObjects.push(child);
+    }
+    if (child.name === "Fan_Base" || child.name.includes("Fan_Base")) {
+      pickableObjects.push(child);
+    }
+
+    // ตรวจหาและใส่ Shader ให้ใบไม้ต้นไม้ (Shelf_Plant)
+    const isPlant = child.name === "Shelf_Plant" || (child.parent && child.parent.name === "Shelf_Plant");
+    if (isPlant) {
+      pickableObjects.push(child);
+      if (child.isMesh) {
+        if ((child.material && child.material.name === "Decor_Leaf") || (child.parent && child.parent.children && child.parent.children[1] === child)) {
+          child.material = plantMaterial;
+        }
+        child.name = "Shelf_Plant";
+      }
+    } else if (child.isMesh && child.material && child.material.name === "Decor_Leaf") {
+      child.material = plantMaterial;
+      child.name = "Shelf_Plant";
+      pickableObjects.push(child);
+    }
+
+    // ตรวจหาและใส่ Shader ให้ผิวน้ำกาแฟ (Desk_CoffeeMug)
+    const isMug = child.name === "Desk_CoffeeMug" || (child.parent && child.parent.name === "Desk_CoffeeMug");
+    if (isMug) {
+      pickableObjects.push(child);
+      if (child.isMesh) {
+        if ((child.material && child.material.name === "Decor_CoffeeLiquid") || (child.parent && child.parent.children && child.parent.children[1] === child)) {
+          child.material = coffeeMaterial;
+        }
+        child.name = "Desk_CoffeeMug";
+      }
+    } else if (child.isMesh && child.material && child.material.name === "Decor_CoffeeLiquid") {
+      child.material = coffeeMaterial;
+      child.name = "Desk_CoffeeMug";
+      pickableObjects.push(child);
+    }
+
+    // ตรวจหาและใส่ Shader ให้ถ้วยรางวัล (Shelf_Trophy)
+    if (child.name === "Shelf_Trophy" || (child.material && child.material.name === "Decor_Gold" && child.name.includes("Trophy"))) {
+      child.material = trophyMaterial;
+      child.name = "Shelf_Trophy";
+      pickableObjects.push(child);
+    }
+
+    // เก็บ Group หรือ Mesh ที่ตรงกับ PICK_INFO (รวมถึง sub-meshes ของวัตถุที่มี parent อยู่ใน PICK_INFO)
+    let pickName = child.name;
+    if (!PICK_INFO[pickName] && child.parent && PICK_INFO[child.parent.name]) {
+      pickName = child.parent.name;
+    }
+    if (PICK_INFO[pickName] && !pickableObjects.includes(child)) {
+      pickableObjects.push(child);
+    }
+
+    if (!child.isMesh) return;
+
+    // จูนวัสดุโลหะ PBR ทั้งหมดในฉากให้ดึงเงาสะท้อนจาก Studio Environment Map มาใช้อย่างเต็มที่
+    if (child.material) {
+      const mats = Array.isArray(child.material) ? child.material : [child.material];
+      mats.forEach((m) => {
+        if (m && m.isMeshStandardMaterial && m.metalness > 0.4) {
+          m.envMapIntensity = 1.6;
+        }
+      });
+    }
+
+    // ข้อ 5: ใส่ Cel Shading 5 วัตถุ 5 สไตล์เฉพาะตัวไม่ซ้ำกัน
+    const isChair = child.name === "Chair" || (child.parent && child.parent.name === "Chair");
+    if (isChair) child.material = chairCelMaterial;
+
+    const isComputer = child.name === "Computer" || (child.parent && child.parent.name === "Computer");
+    if (isComputer) child.material = computerCelMaterial;
+
+    const isMonitor = child.name === "Monitor" || (child.parent && child.parent.name === "Monitor");
+    if (isMonitor) child.material = monitorCelMaterial;
+
+    const isKeyboard = child.name === "Keyboard" || (child.parent && child.parent.name === "Keyboard");
+    if (isKeyboard) child.material = keyboardCelMaterial;
+
+    const isMouse = child.name === "Mouse" || (child.parent && child.parent.name === "Mouse");
+    if (isMouse) child.material = mouseCelMaterial;
+
+    // เฟอร์นิเจอร์ไม้โอ๊คสีน้ำผึ้งธรรมชาติ (Natural Honey Oak Desk, Shelf & Cabinet)
+    const isTable = child.name === "Table" || (child.parent && child.parent.name === "Table");
+    if (isTable) child.material = woodFurnitureMaterial;
+
+    const isShelf = child.name === "Shelf" || (child.parent && child.parent.name === "Shelf");
+    if (isShelf) child.material = woodFurnitureMaterial;
+
+    const isCabinet = child.name === "Cabinet" || (child.parent && child.parent.name === "Cabinet");
+    if (isCabinet) {
+      if (child.material && child.material.name === "text.001") {
+        child.material = new THREE.MeshStandardMaterial({
+          color: 0xdce4ee,
+          metalness: 1.0,
+          roughness: 0.14,
+          envMapIntensity: 2.8,
+        });
+      } else {
+        child.material = woodFurnitureMaterial;
+      }
+    }
+
+    // พรมทอเส้นใยสแกนดิเนเวีย (Woven Fabric Rug)
+    const isRug = child.name === "Room_Rug" || (child.parent && child.parent.name === "Room_Rug") || (child.material && child.material.name === "Decor_Rug");
+    if (isRug) {
+      child.material = rugMaterial;
+      child.receiveShadow = true;
+    }
+
+    // พัดลมตั้งพื้นสีสตูดิโอชาร์โคล (Studio Charcoal Fan)
+    const isFan = child.name.startsWith("Fan_") || (child.parent && child.parent.name && child.parent.name.startsWith("Fan_"));
+    if (isFan) {
+      const isBlade = child.name.includes("Blades") || (child.parent && child.parent.name.includes("Blades"));
+      if (!isBlade) {
+        child.material = fanBodyMaterial;
+      }
+    }
+
+    // โคมไฟตั้งโต๊ะ (Desk Lamp)
+    if (child.name === "Desk_Lamp") {
+      if (Array.isArray(child.material)) {
+        deskLampBulbMat = child.material.find(m => m.name === "Decor_LampBulb") || child.material[2];
+      } else {
+        deskLampBulbMat = child.material;
+      }
+      if (isDark && deskLampBulbMat) {
+        deskLampBulbMat.emissive.set(0xff9e24);
+        deskLampBulbMat.emissiveIntensity = 1.6;
+      }
+    }
+
+    // หลอดไฟนีออนติดผนัง (Lampbar)
+    if (child.name === "Lampbar") {
+      lampBarMat = child.material;
+      if (isDark && lampBarMat) {
+        lampBarMat.emissive.set(0xffedd5);
+        lampBarMat.emissiveIntensity = 2.6;
+      }
+    }
+
+    // ข้อ 2: ข้อมูลนิสิต 3 มิติ (Student Information 3D Text & SignBoard)
+    const isStudentInfo = child.name === "StudentInfo_3DText" || (child.parent && child.parent.name === "StudentInfo_3DText");
+    if (isStudentInfo) {
+      pickableObjects.push(child);
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        const applyPlaqueMats = (mat) => {
+          if (!mat) return mat;
+          const name = mat.name || "";
+          if (name.includes("Gold")) {
+            return new THREE.MeshStandardMaterial({
+              color: 0xf59e0b,       // สีทองคำแชมเปญหรูหรา (Champagne Gold)
+              metalness: 1.0,        // โลหะแท้บริสุทธิ์ 100%
+              roughness: 0.14,       // ขัดเงาวาวเกิดประกายสะท้อนไฟสปอตไลต์
+              envMapIntensity: 2.8,  // ดึงภาพสะท้อนแสงสตูดิโอให้เกิดประกายเงาวับ
+            });
+          }
+          if (name.includes("Silver")) {
+            return new THREE.MeshStandardMaterial({
+              color: 0xe2e8f0,       // สีเงินแพลทินัมสว่าง (Platinum Silver)
+              metalness: 0.95,
+              roughness: 0.22,
+              envMapIntensity: 2.4,
+            });
+          }
+          if (name.includes("Chrome")) {
+            return new THREE.MeshStandardMaterial({
+              color: 0xffffff,       // สีโครเมียมเงากระจกสำหรับรหัสนิสิต (Mirror Chrome)
+              metalness: 1.0,
+              roughness: 0.08,
+              envMapIntensity: 3.0,
+            });
+          }
+          if (name.includes("DarkSatin")) {
+            return new THREE.MeshStandardMaterial({
+              color: 0x141821,       // แผ่นเพลตโลหะสีดำเข้มขัดลายซาติน (Satin Gunmetal Plate)
+              metalness: 0.85,
+              roughness: 0.32,
+              envMapIntensity: 1.4,
+            });
+          }
+          if (name.includes("PillBase")) {
+            return new THREE.MeshStandardMaterial({
+              color: 0x0f172a,       // ฐานแคปซูลป้ายรหัสนิสิตสีไทเทเนียมเข้ม
+              metalness: 0.90,
+              roughness: 0.25,
+              envMapIntensity: 1.8,
+            });
+          }
+          return mat;
+        };
+
+        if (Array.isArray(child.material)) {
+          child.material = child.material.map(applyPlaqueMats);
+        } else {
+          child.material = applyPlaqueMats(child.material);
+        }
+      }
+    }
+
+    if (child.name === "SignBoard") {
+      child.material = new THREE.MeshStandardMaterial({
+        color: 0x242832,       // แผ่นเพลตโลหะไทเทเนียมขัดด้าน (Brushed Dark Titanium Metal Base)
+        metalness: 1.0,        // โลหะแท้บริสุทธิ์ 100%
+        roughness: 0.22,       // ความเงาสะท้อนสไตล์โมเดิร์น
+        envMapIntensity: 2.2,  // ดึงแสงสะท้อนจาก Studio Environment Map
+      });
+      child.receiveShadow = true;
+    }
+
+    // ระบบแสงเงา 3 มิติ (Real-time Cast & Receive Shadows):
+    // กำหนดให้เฟอร์นิเจอร์และอุปกรณ์ในห้องทอดเงาลงพื้นและผนังห้องอย่างสมจริง
+    if (child.name !== "CoffeeSteam") {
+      child.castShadow = true;
+    }
+    child.receiveShadow = true;
+
+    // ผนังระแนงไม้โมเดิร์น (Room_Walls), พื้นคอนกรีตมินิมอล (Room_Floor), และเปลือกนอกอาคาร (Room_Exterior)
+    const mapRoomMat = (m) => {
+      if (!m) return m;
+      const n = m.name || "";
+      if (n === "Room_Walls" || n.includes("Wall")) return wallMaterial;
+      if (n === "Room_Floor" || n.includes("Floor")) return floorMaterial;
+      if (n === "Room_Exterior" || n.includes("Exterior")) return exteriorMaterial;
+      return m;
+    };
+
+    if (Array.isArray(child.material)) {
+      child.material = child.material.map(mapRoomMat);
+    } else if (child.material) {
+      child.material = mapRoomMat(child.material);
+    }
+
+    const isRoom = child.name === "Room" || (child.parent && child.parent.name === "Room");
+    if (isRoom) {
+      child.receiveShadow = true;
+    }
+
+    // ซ่อนแผ่นป้ายเดิม (NavSignPost) ในกรณีที่โหลดแคชเก่า
+    if (child.name.startsWith("NavSign") || child.name === "mywork" || child.name === "aboutw" || child.name === "contact") {
+      child.visible = false;
+    }
+
+    if (child.name === "PictureFrame" || (child.parent && child.parent.name === "PictureFrame")) {
+      pickableObjects.push(child);
+    }
+
+    // ข้อ 8: เก็บ Object ที่คลิกได้
+    if (PICK_INFO[child.name]) {
+      pickableObjects.push(child);
+    }
+  });
+
+  // ---------------------------------------------------------
+  // ข้อ 3: Photo texture ของผู้จัดทำบน PictureFrame
+  // ---------------------------------------------------------
+  const picFrameObj = gltf.scene.getObjectByName("PictureFrame");
+  if (picFrameObj) {
+    pickableObjects.push(picFrameObj);
+    picFrameObj.traverse((c) => { if (c.isMesh) pickableObjects.push(c); });
+  }
+
+  // สร้างแผ่นภาพแสดงรูปถ่ายนิสิตระดับคมชัดสูง (Dedicated HD Photo Surface)
+  const photoMat = new THREE.MeshStandardMaterial({
+    roughness: 0.35,
+    metalness: 0.0,
+  });
+  const photoMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.38, 0.48), photoMat);
+  photoMesh.name = "PictureFrame";
+  photoMesh.position.set(-1.623, 1.70, 0);
+  photoMesh.rotation.y = Math.PI / 2; // หันหน้าตรงเข้าห้อง (+X) 100%
+  contentGroup.add(photoMesh);
+  pickableObjects.push(photoMesh);
+
+  // กรอบโลหะสเตนเลสสตีลขัดเงาวาวล้อมรอบรูปถ่าย (Polished Stainless Steel Gallery Frame)
+  const frameMetalMat = new THREE.MeshStandardMaterial({
+    color: 0xdce4ee,       // สีเงินสว่างประกายโลหะสเตนเลสแท้ (Polished Silver Steel)
+    metalness: 1.0,        // โลหะแท้บริสุทธิ์ 100%
+    roughness: 0.14,       // ขัดเงาวาวเกิดประกายสะท้อนไฟสปอตไลต์
+    envMapIntensity: 2.8,  // ดึงภาพสะท้อนแสงไฟสตูดิโอให้เกิดประกายแวววาว
+  });
+
+  // ขอบทองคำแชมเปญคั่นในกรอบรูป (Champagne Gold Inner Bevel)
+  const frameGoldMat = new THREE.MeshStandardMaterial({
+    color: 0xf59e0b,
+    metalness: 1.0,
+    roughness: 0.12,
+    envMapIntensity: 3.0,
+  });
+
+  const metalFrameGroup = new THREE.Group();
+  metalFrameGroup.name = "PictureFrame";
+  metalFrameGroup.position.set(-1.65, 1.70, 0);
+
+  const frameLipThick = 0.024;
+  const frameLipDepth = 0.018;
+  const frontX = 0.025 + frameLipDepth / 2;
+
+  // กรอบนอกสเตนเลสสตีล 4 ด้าน
+  const topBar = new THREE.Mesh(new THREE.BoxGeometry(frameLipDepth, frameLipThick, 0.44), frameMetalMat);
+  topBar.position.set(frontX, 0.25 - frameLipThick / 2, 0);
+  metalFrameGroup.add(topBar);
+
+  const btmBar = new THREE.Mesh(new THREE.BoxGeometry(frameLipDepth, frameLipThick, 0.44), frameMetalMat);
+  btmBar.position.set(frontX, -0.25 + frameLipThick / 2, 0);
+  metalFrameGroup.add(btmBar);
+
+  const leftBar = new THREE.Mesh(new THREE.BoxGeometry(frameLipDepth, 0.50, frameLipThick), frameMetalMat);
+  leftBar.position.set(frontX, 0, 0.20 - frameLipThick / 2);
+  metalFrameGroup.add(leftBar);
+
+  const rightBar = new THREE.Mesh(new THREE.BoxGeometry(frameLipDepth, 0.50, frameLipThick), frameMetalMat);
+  rightBar.position.set(frontX, 0, -0.20 + frameLipThick / 2);
+  metalFrameGroup.add(rightBar);
+
+  // ขอบในทองคำหรูหรา 4 ด้าน (Gold Accent Inset Trim)
+  const gLip = 0.006;
+  const gDepth = 0.020;
+  const gFrontX = 0.025 + gDepth / 2;
+
+  const gTop = new THREE.Mesh(new THREE.BoxGeometry(gDepth, gLip, 0.392), frameGoldMat);
+  gTop.position.set(gFrontX, 0.25 - frameLipThick - gLip / 2, 0);
+  metalFrameGroup.add(gTop);
+
+  const gBtm = new THREE.Mesh(new THREE.BoxGeometry(gDepth, gLip, 0.392), frameGoldMat);
+  gBtm.position.set(gFrontX, -0.25 + frameLipThick + gLip / 2, 0);
+  metalFrameGroup.add(gBtm);
+
+  const gLeft = new THREE.Mesh(new THREE.BoxGeometry(gDepth, 0.452, gLip), frameGoldMat);
+  gLeft.position.set(gFrontX, 0, 0.20 - frameLipThick - gLip / 2);
+  metalFrameGroup.add(gLeft);
+
+  const gRight = new THREE.Mesh(new THREE.BoxGeometry(gDepth, 0.452, gLip), frameGoldMat);
+  gRight.position.set(gFrontX, 0, -0.20 + frameLipThick + gLip / 2);
+  metalFrameGroup.add(gRight);
+
+  // ปลอกหุ้มขอบรอบด้านนอก (Outer Perimeter Rim) สเตนเลสสตีลเงาวับ
+  const casingThick = 0.008;
+  const casingDepth = 0.055;
+  const outerTop = new THREE.Mesh(new THREE.BoxGeometry(casingDepth, casingThick, 0.42), frameMetalMat);
+  outerTop.position.set(0.003, 0.25 + casingThick / 2, 0);
+  metalFrameGroup.add(outerTop);
+
+  const outerBtm = new THREE.Mesh(new THREE.BoxGeometry(casingDepth, casingThick, 0.42), frameMetalMat);
+  outerBtm.position.set(0.003, -0.25 - casingThick / 2, 0);
+  metalFrameGroup.add(outerBtm);
+
+  const outerLeft = new THREE.Mesh(new THREE.BoxGeometry(casingDepth, 0.52, casingThick), frameMetalMat);
+  outerLeft.position.set(0.003, 0, 0.20 + casingThick / 2);
+  metalFrameGroup.add(outerLeft);
+
+  const outerRight = new THREE.Mesh(new THREE.BoxGeometry(casingDepth, 0.52, casingThick), frameMetalMat);
+  outerRight.position.set(0.003, 0, -0.20 - casingThick / 2);
+  metalFrameGroup.add(outerRight);
+
+  contentGroup.add(metalFrameGroup);
+  pickableObjects.push(metalFrameGroup);
+
+  // โหลดรูปถ่ายนิสิตลงบนแผ่นภาพ
+  const applyPhotoTexture = (tex) => {
+    tex.colorSpace = THREE.SRGBColorSpace;
+    photoMat.map = tex;
+    photoMat.needsUpdate = true;
+  };
+
+  const texLoader = new THREE.TextureLoader();
+  texLoader.load(
+    "./profile.png",
+    applyPhotoTexture,
+    undefined,
+    () => applyPhotoTexture(createAvatarTexture())
+  );
+
+  // สร้างกรอบโลหะสเตนเลสและหมุด 4 มุมรอบป้าย SignBoard (Mirror Polished Architectural Steel Frame)
+  const plaqueFrameMat = new THREE.MeshStandardMaterial({
+    color: 0xf0f4f8,       // สเตนเลสสตีลสีเงินสว่างพิเศษ (Mirror Polished Steel)
+    metalness: 1.0,        // โลหะแท้บริสุทธิ์ 100%
+    roughness: 0.10,       // เงากระจกสะท้อนไฟเต็มพิกัด
+    envMapIntensity: 3.0,
+  });
+
+  const plaqueFrameGroup = new THREE.Group();
+  plaqueFrameGroup.name = "SignBoard";
+  plaqueFrameGroup.position.set(-1.634, 1.30, -1.035);
+
+  const pW = 1.22;   // กว้างตามแกน Z
+  const pH = 0.72;   // สูงตามแกน Y
+  const pD = 0.054;  // หนาตามแกน X
+  const fLip = 0.018;// ความหนาขอบกรอบ
+
+  // ขอบบน
+  const fTop = new THREE.Mesh(new THREE.BoxGeometry(pD, fLip, pW), plaqueFrameMat);
+  fTop.position.set(0.002, pH / 2 - fLip / 2, 0);
+  plaqueFrameGroup.add(fTop);
+
+  // ขอบล่าง
+  const fBtm = new THREE.Mesh(new THREE.BoxGeometry(pD, fLip, pW), plaqueFrameMat);
+  fBtm.position.set(0.002, -pH / 2 + fLip / 2, 0);
+  plaqueFrameGroup.add(fBtm);
+
+  // ขอบข้างซ้าย
+  const fLeft = new THREE.Mesh(new THREE.BoxGeometry(pD, pH, fLip), plaqueFrameMat);
+  fLeft.position.set(0.002, 0, -pW / 2 + fLip / 2);
+  plaqueFrameGroup.add(fLeft);
+
+  // ขอบข้างขวา
+  const fRight = new THREE.Mesh(new THREE.BoxGeometry(pD, pH, fLip), plaqueFrameMat);
+  fRight.position.set(0.002, 0, pW / 2 - fLip / 2);
+  plaqueFrameGroup.add(fRight);
+
+  contentGroup.add(plaqueFrameGroup);
+  pickableObjects.push(plaqueFrameGroup);
+
+  // หมุดเหล็กเงาวาว 4 มุมยึดป้าย SignBoard (Mirror Chrome Standoff Screws)
+  const boltMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    metalness: 1.0,
+    roughness: 0.08,
+    envMapIntensity: 2.2,
+  });
+  const boltGeo = new THREE.CylinderGeometry(0.015, 0.015, 0.02, 16);
+  boltGeo.rotateZ(Math.PI / 2);
+  const boltOffsets = [
+    [-0.52,  0.28], // บนซ้าย
+    [ 0.52,  0.28], // บนขวา
+    [-0.52, -0.28], // ล่างซ้าย
+    [ 0.52, -0.28]  // ล่างขวา
+  ];
+  boltOffsets.forEach(([dz, dy]) => {
+    const bolt = new THREE.Mesh(boltGeo, boltMat);
+    bolt.position.set(-1.605, 1.30 + dy, -1.035 + dz);
+    bolt.name = "SignBoard";
+    contentGroup.add(bolt);
+    pickableObjects.push(bolt);
+  });
+}
+
+// แยกคลิกกับการลากกล้อง (เพื่อไม่ให้ลากกล้องแล้วเผลอคลิกโดนวัตถุ)
+let downX = 0, downY = 0;
+let isDragging = false;
+
+canvas.addEventListener("pointerdown", (e) => {
+  downX = e.clientX;
+  downY = e.clientY;
+  isDragging = false;
+});
+
+canvas.addEventListener("pointermove", (e) => {
+  if (Math.hypot(e.clientX - downX, e.clientY - downY) > 6) {
+    isDragging = true;
+  }
+  mouse.x =  (e.clientX / window.innerWidth)  * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(pickableObjects, true);
+  let hasPickable = false;
+  for (let i = 0; i < hits.length; i++) {
+    let target = hits[i].object;
+    while (target && !PICK_INFO[target.name] && target.parent && target !== contentGroup) {
+      target = target.parent;
+    }
+    if (target && PICK_INFO[target.name]) {
+      hasPickable = true;
+      break;
+    }
+  }
+  canvas.classList.toggle("hovering", hasPickable);
+});
+
+canvas.addEventListener("pointerup", (e) => {
+  if (isDragging) return; // ถ้าเป็นการลากหมุนกล้อง ให้ข้ามไป
+
+  mouse.x =  (e.clientX / window.innerWidth)  * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(pickableObjects, true);
+  for (let i = 0; i < hits.length; i++) {
+    let target = hits[i].object;
+    while (target && !PICK_INFO[target.name] && target.parent && target !== contentGroup) {
+      target = target.parent;
+    }
+    const info = target ? PICK_INFO[target.name] : null;
+    if (info) {
+      focusTarget(info.cam, info.look, info.text);
+      break;
+    }
+  }
+});
+
+// เมื่อผู้ใช้แตะ OrbitControls เอง ให้หยุด Lerp กล้อง
+controls.addEventListener("start", () => {
+  isLerping = false;
+});
+
+// ปุ่มลัดนำทางสำรวจวัตถุ 3D ด้านบนจอ (Quick Nav)
+document.querySelectorAll(".nav-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const key = btn.dataset.target;
+    if (key === "Reset") {
+      focusTarget(new THREE.Vector3(5.0, 3.5, -5.0), new THREE.Vector3(0, 1.0, 0), "🔄 มุมมองภาพรวมห้องพอร์ตโฟลิโอ 3 มิติ");
+    } else {
+      const info = PICK_INFO[key];
+      if (info) {
+        focusTarget(info.cam, info.look, info.text);
+      }
+    }
+  });
+});
+
+// พยายามโหลดไฟล์ local ก่อน ถ้าไม่พบให้ดึงจาก GitHub
+loader.load(
+  "./myport.glb",
+  onModelLoaded,
+  undefined,
+  () => {
+    loader.load(
+      MODEL_PATH,
+      onModelLoaded,
+      undefined,
+      (error) => {
+        loadingHint.textContent = "หาโมเดลไม่เจอ";
+        console.error(error);
+      }
+    );
+  }
+);
+
+// ---------------------------------------------------------
+// สลับโหมดสว่าง/มืด
+// ---------------------------------------------------------
+const toggleButton = document.getElementById("theme-toggle");
+const themeLabel = document.getElementById("theme-label");
+
+function applyTheme(dark) {
+  const t = dark ? THEME.dark : THEME.light;
+
+  document.body.classList.toggle("dark", dark);
+  ambientLight.color.set(t.ambient);
+  ambientLight.intensity = t.ambientIntensity;
+  directionalLight.color.set(t.directional);
+  directionalLight.intensity = t.directionalIntensity;
+  lightSourceMaterial.color.set(t.sun);
+  lightGlowMaterial.color.set(t.sun);
+
+  // ควบคุมแสงสว่างจากโคมไฟตั้งโต๊ะ (Desk Lamp) และหลอดไฟนีออนติดผนัง (Lampbar)
+  if (dark) {
+    // โหมดกลางคืน: เปิดไฟส่องลงโต๊ะวงกะทัดรัด สบายตา
+    deskLampLight.intensity = 2.0;
+    deskBulbMesh.visible = true;
+    lampBarLight.intensity = 1.4;
+    barDiffuseLight.intensity = 1.2;
+    barBloomMat.uniforms.uOpacity.value = 0.55;
+    plaqueLight.intensity = 1.0;
+
+    if (deskLampBulbMat) {
+      deskLampBulbMat.emissive.set(0xff9e24);
+      deskLampBulbMat.emissiveIntensity = 2.0;
+    }
+    if (lampBarMat) {
+      lampBarMat.emissive.set(0xffedd5);
+      lampBarMat.emissiveIntensity = 2.6;
+    }
+    if (typeof steamUniforms !== "undefined") {
+      steamUniforms.uColor.value.set(0xffedd8); // ละอองควันไออุ่นสะท้อนแสงไฟสีส้ม
+    }
+  } else {
+    // โหมดกลางวัน: ปิดไฟโคมไฟและหลอดไฟนีออน
+    deskLampLight.intensity = 0;
+    deskBulbMesh.visible = false;
+    lampBarLight.intensity = 0;
+    barDiffuseLight.intensity = 0;
+    barBloomMat.uniforms.uOpacity.value = 0.0;
+    plaqueLight.intensity = 1.4;
+
+    if (deskLampBulbMat) {
+      deskLampBulbMat.emissive.set(0x000000);
+      deskLampBulbMat.emissiveIntensity = 0;
+    }
+    if (lampBarMat) {
+      lampBarMat.emissive.set(0x000000);
+      lampBarMat.emissiveIntensity = 0;
+    }
+    if (typeof steamUniforms !== "undefined") {
+      steamUniforms.uColor.value.set(0xfbf6ee); // ละอองควันสีขาวนวลยามเช้า
+    }
+  }
+
+  clouds.forEach((cloud) => {
+    cloud.children.forEach((puff) => {
+      puff.material.color.set(t.cloudColor);
+    });
+  });
+
+  themeLabel.textContent = dark ? "Dark" : "Light";
+}
+
+toggleButton.addEventListener("click", () => {
+  isDark = !isDark;
+  applyTheme(isDark);
+});
+
+// ---------------------------------------------------------
+// resize
+// ---------------------------------------------------------
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ---------------------------------------------------------
+// ลูปเรนเดอร์
+// ---------------------------------------------------------
+function animate() {
+  requestAnimationFrame(animate);
+
+  const elapsed = clock.getElapsedTime();
+
+  // ข้อ 6: อัปเดตเวลาให้ Real-time Vertex Shaders ทั้ง 3 วัตถุ และระบบควันไอร้อน
+  trophyUniforms.uTime.value = elapsed;
+  plantUniforms.uTime.value  = elapsed;
+  coffeeUniforms.uTime.value = elapsed;
+  steamUniforms.uTime.value  = elapsed;
+
+  // พัดลมตั้งพื้น (Oscillating Fan):
+  // 1. หัวพัดลมส่าย หันซ้าย-หันขวา (แกน Z คือแกนหมุนส่ายซ้ายขวาตามระบบพิกัดโมเดล)
+  if (fanHead) {
+    fanHead.rotation.y = 0;
+    fanHead.rotation.z = Math.sin(elapsed * 1.5) * 0.70; // ส่ายหันซ้าย-ขวา ±40 องศา
+  }
+  // 2. ใบพัดหมุนติ้วๆ รอบแกนเพลา
+  if (fanBlades) {
+    fanBlades.rotateY(0.35);
+  }
+
+  // ข้อ 8: Camera Lerp หลังคลิก Object (เลื่อนกล้องนุ่มนวล แม่นยำ ไม่สั่นกระตุก)
+  if (isLerping) {
+    lerpProgress += 0.035;
+    if (lerpProgress >= 1.0) {
+      lerpProgress = 1.0;
+      isLerping = false;
+      camera.position.copy(camTarget);
+      controls.target.copy(lookTarget);
+    } else {
+      const t = 1 - Math.pow(1 - lerpProgress, 3);
+      camera.position.lerpVectors(lerpStartCam, camTarget, t);
+      controls.target.lerpVectors(lerpStartLook, lookTarget, t);
+    }
+  }
+
+  clouds.forEach((cloud) => {
+    const phase = cloud.userData.phase;
+    const speed = cloud.userData.speed;
+
+    cloud.position.x =
+      cloud.userData.baseX +
+      Math.sin(elapsed * speed + phase) * cloud.userData.driftX;
+
+    cloud.position.y =
+      cloud.userData.baseY +
+      Math.sin(elapsed * speed * 0.72 + phase) * 0.12;
+
+    cloud.rotation.y += 0.0008;
+  });
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+animate();
+</script>
+
+</body>
+</html>
