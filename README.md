@@ -78,6 +78,16 @@
 | 1 | **Paint Tool** | Web Paint Tool, Brush Drawing, Color Palette | 👉 [**เปิดงาน Paint**](https://githu9phadol.github.io/paint.html) |
 | 2 | **Raster Graphics Paint** | Rasterization Algorithms, Pixel Operations | 👉 [**เปิดงาน Raster Paint**](https://githu9phadol.github.io/raster_paint.html) |
 | 3 | **PBR Rendering Scene** | WebGL PBR Shading & Image-Based Lighting Studio | 👉 [**เปิดงาน PBR Scene**](https://githu9phadol.github.io/pbr-scene.html) |
+| 4 | **24bit Interactive Graphics** | HTML5 Canvas 2D, PutPixel, Sprite Rotation & Scaling | 👉 [**เปิดงาน 24bit**](https://githu9phadol.github.io/coursework/24bit.html) |
+| 5 | **2D Transformation** | 2D Transformation Matrices (Translate, Rotate, Scale) | 👉 [**เปิดงาน 2D Transform**](https://githu9phadol.github.io/coursework/800_Transformation.html) |
+| 6 | **Raster Algorithms Lab** | Bresenham Line & Circle Drawing Algorithms | 👉 [**เปิดงาน Raster Lab**](https://githu9phadol.github.io/coursework/800_raster.html) |
+| 7 | **3D Lighting Studio** | Three.js Ambient, Directional & Point Lighting | 👉 [**เปิดงาน 3D Lighting**](https://githu9phadol.github.io/coursework/Lighting.html) |
+| 8 | **Knife Texture UV Mesh** | 3D Knife Model & UV Texture Mapping | 👉 [**เปิดงาน Knife UV**](https://githu9phadol.github.io/coursework/gpuMeshUVknife.html) |
+| 9 | **Wood Table UV Mesh** | 3D Wood Table Model & Texture Mapping | 👉 [**เปิดงาน Table UV**](https://githu9phadol.github.io/coursework/gpuMesh_UV_wood.html) |
+| 10 | **Vertex Color 3D Mesh** | Vertex Color Interpolation & UV Coordinates | 👉 [**เปิดงาน Vertex Color**](https://githu9phadol.github.io/coursework/gpuMesh_Vertex_UV_VertexColor.html) |
+| 11 | **Cel Shading (Toon Shader)** | Custom GLSL Fragment Shader & Rim Lighting | 👉 [**เปิดงาน Cel Shading**](https://githu9phadol.github.io/coursework/cell_shade.html) |
+| 12 | **3D Object Picking** | Three.js Raycaster & 3D Interactive Object Selection | 👉 [**เปิดงาน Object Picking**](https://githu9phadol.github.io/coursework/picking.html) |
+| 13 | **GPU Interaction Lab** | WebGL Real-time Mouse & Keyboard Interaction | 👉 [**เปิดงาน GPU Interaction**](https://githu9phadol.github.io/coursework/800_interraction.html) |
 
 ---
 
