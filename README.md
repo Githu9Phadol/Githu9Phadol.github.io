@@ -75,7 +75,7 @@
 |:---:|---|---|:---:|
 | 🏆 | **Final Project: 3D Room Portfolio (ฉบับสมบูรณ์)** | Three.js, GLSL, Blender, PBR Materials, Raycasting | 👉 [**เปิดผลงาน 3D Room ล่าสุด**](https://githu9phadol.github.io/project/myportfoilo.html) |
 | 📁 | **3D Room (งานส่งเดิม / ต้นแบบ)** | Three.js, Blender Room Model, Controls | 👉 [**เปิดงานเดิม**](https://githu9phadol.github.io/myportfoilo.html) |
-| 1 | **งาน 1: 24bit Interactive Graphics** | HTML5 Canvas 2D, PutPixel, Sprite Rotation & Scaling | 👉 [**เปิดงาน 24bit**](https://githu9phadol.github.io/index.html) |
+| 1 | **งาน 1: 24bit Interactive Graphics** | HTML5 Canvas 2D, PutPixel, Sprite Rotation & Scaling | 👉 [**เปิดงาน 24bit**](https://githu9phadol.github.io/24bit.html) |
 | 2 | **งาน 2: Paint Tool** | Web Paint Tool, Brush Drawing, Color Palette | 👉 [**เปิดงาน Paint**](https://githu9phadol.github.io/paint.html) |
 | 3 | **งาน 3: Raster Graphics Paint** | Rasterization Algorithms, Pixel Operations | 👉 [**เปิดงาน Raster Paint**](https://githu9phadol.github.io/raster_paint.html) |
 | 4 | **2D Transformation** | 2D Transformation Matrices (Translate, Rotate, Scale) | 👉 [**เปิดงาน 2D Transform**](https://githu9phadol.github.io/800_Transformation.html) |
