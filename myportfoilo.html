@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>My Portfolio Room</title>
+<style>
+  :root {
+    --bg-light: #f4f2fb;
+    --bg-dark: #14121f;
+    --panel-light: rgba(255, 255, 255, 0.7);
+    --panel-dark: rgba(30, 27, 46, 0.7);
+    --text-light: #2a2640;
+    --text-dark: #f0eefa;
+    --accent: #b79cf0;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg-light);
+  }
+
+  #scene-container {
+    position: fixed;
+    inset: 0;
+  }
+
+  #scene-container canvas {
+    display: block;
+  }
+
+  #theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: var(--panel-light);
+    color: var(--text-light);
+    backdrop-filter: blur(8px);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  body.dark #theme-toggle {
+    background: var(--panel-dark);
+    color: var(--text-dark);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  #theme-toggle .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  #loading-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 10;
+    font-size: 13px;
+    color: var(--text-light);
+    opacity: 0.6;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  body.dark #loading-hint {
+    color: var(--text-dark);
+  }
+</style>
+</head>
+<body>
+
+<div id="scene-container"></div>
+
+<button id="theme-toggle">
+  <span class="dot"></span>
+  <span id="theme-label">Light</span>
+</button>
+
+<div id="loading-hint">กำลังโหลดโมเดล...</div>
+
+<!--
+  วิธีใส่โมเดลของคุณเอง
+  1. export ไฟล์จาก Blender เป็น .glb
+  2. ตั้งชื่อไฟล์ myport.glb แล้ววางไว้ในโฟลเดอร์ model/ ข้างๆไฟล์ index.html นี้
+     โครงสร้างไฟล์ที่ต้องมีใน repo:
+       index.html
+       model/myport.glb
+  3. ถ้าจะใช้ชื่อไฟล์อื่น แก้ที่ตัวแปร MODEL_PATH ด้านล่างได้เลย
+-->
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+// ---------------------------------------------------------
+// ตั้งค่าตรงนี้ได้ตามใจ
+// ---------------------------------------------------------
+const MODEL_PATH = "myport.glb";
+
+const THEME = {
+  light: {
+    bg: 0xf4f2fb,
+    fog: 0xf4f2fb,
+    ground: 0x8fd48a,
+    ambient: 0xffffff,
+    ambientIntensity: 0.9,
+    directional: 0xffffff,
+    directionalIntensity: 1.0,
+    cloudColor: 0xffffff,
+    sun: 0xfff2c2,
+  },
+  dark: {
+    bg: 0x14121f,
+    fog: 0x14121f,
+    ground: 0x1f1c30,
+    ambient: 0x6a5acd,
+    ambientIntensity: 0.4,
+    directional: 0xb7a4ff,
+    directionalIntensity: 0.6,
+    cloudColor: 0x3a3560,
+    sun: 0xcbd0ff,
+  },
+};
+
+let isDark = false;
+const clock = new THREE.Clock();
+
+// ---------------------------------------------------------
+// Vertex/Fragment shader ของพื้นหญ้า (ข้อ vertex shader ในโจทย์)
+// เทคนิคเดียวกับตัวอย่างในคลาส: ส่ง uTime เข้า vertex shader
+// แล้วขยับตำแหน่งจุดด้วย sin() ทุกเฟรม
+// ---------------------------------------------------------
+const grassUniforms = {
+  uTime: { value: 0 },
+  uColor: { value: new THREE.Color(0xffffff) },
+};
+
+const grassVertexShader = `
+  uniform float uTime;
+  varying float vElevation;
+
+  void main() {
+    vec3 pos = position;
+
+    // ระนาบพื้นถูกหมุนนอนราบแล้ว แกน Z ของ local space คือ "ขึ้น-ลง" จริง
+    float wave1 = sin(pos.x * 1.5 + uTime * 1.2) * 0.08;
+    float wave2 = sin(pos.y * 2.0 + uTime * 0.8) * 0.05;
+    pos.z += wave1 + wave2;
+
+    vElevation = pos.z;
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+  }
+`;
+
+const grassFragmentShader = `
+  precision mediump float;
+  uniform vec3 uColor;
+  varying float vElevation;
+
+  void main() {
+    float highlight = smoothstep(-0.05, 0.1, vElevation);
+    vec3 color = mix(uColor * 0.85, uColor * 1.15, highlight);
+    gl_FragColor = vec4(color, 1.0);
+  }
+`;
+
+// ---------------------------------------------------------
+// พื้นฐานฉาก: renderer, scene, camera
+// ---------------------------------------------------------
+const container = document.getElementById("scene-container");
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(THEME.light.bg);
+scene.fog = new THREE.Fog(THEME.light.fog, 8, 22);
+
+const camera = new THREE.PerspectiveCamera(
+  40,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  100
+);
+camera.position.set(5, 3.5, -5);
+
+// จุดที่โมเดลของคุณจะถูกใส่เข้ามา
+const contentGroup = new THREE.Group();
+scene.add(contentGroup);
+
+// ---------------------------------------------------------
+// แสง
+// ---------------------------------------------------------
+const ambientLight = new THREE.AmbientLight(
+  THEME.light.ambient,
+  THEME.light.ambientIntensity
+);
+scene.add(ambientLight);
+
+const directionalLight = new THREE.DirectionalLight(
+  THEME.light.directional,
+  THEME.light.directionalIntensity
+);
+directionalLight.position.set(4, 6, 3);
+scene.add(directionalLight);
+
+// ---------------------------------------------------------
+// วัตถุแสดงแหล่งกำเนิดแสง ให้เห็นว่าแสงมาจากไหนจริงๆ
+// ---------------------------------------------------------
+const lightSourceGeometry = new THREE.SphereGeometry(0.35, 24, 24);
+const lightSourceMaterial = new THREE.MeshBasicMaterial({
+  color: THEME.light.sun,
+  fog: false,
+});
+const lightSourceMesh = new THREE.Mesh(lightSourceGeometry, lightSourceMaterial);
+lightSourceMesh.position.copy(directionalLight.position);
+scene.add(lightSourceMesh);
+
+const lightGlowGeometry = new THREE.SphereGeometry(0.65, 24, 24);
+const lightGlowMaterial = new THREE.MeshBasicMaterial({
+  color: THEME.light.sun,
+  transparent: true,
+  opacity: 0.25,
+  fog: false,
+});
+const lightGlowMesh = new THREE.Mesh(lightGlowGeometry, lightGlowMaterial);
+lightGlowMesh.position.copy(directionalLight.position);
+scene.add(lightGlowMesh);
+
+// ---------------------------------------------------------
+// ไม่มีพื้นสนามสีเขียว
+// ---------------------------------------------------------
+
+// ---------------------------------------------------------
+// กล่องครอบฉากทั้งหมด (แทนพื้นหลังโล่งๆ ด้วยกล่องล้อมรอบ)
+// ---------------------------------------------------------
+const backgroundBoxGeometry = new THREE.BoxGeometry(40, 40, 40);
+const backgroundBoxMaterial = new THREE.MeshBasicMaterial({
+  color: THEME.light.bg,
+  side: THREE.BackSide,
+  fog: false,
+});
+const backgroundBox = new THREE.Mesh(backgroundBoxGeometry, backgroundBoxMaterial);
+scene.add(backgroundBox);
+
+// ---------------------------------------------------------
+// เมฆลอยตกแต่งฉาก (ทรงต่ำ ก้อนกลมกลุ่มเล็กๆ)
+// ---------------------------------------------------------
+function createCloud(scale) {
+  const cloud = new THREE.Group();
+  const material = new THREE.MeshStandardMaterial({
+    color: THEME.light.cloudColor,
+    roughness: 1,
+    flatShading: true,
+  });
+
+  const puffCount = 4 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < puffCount; i++) {
+    const radius = 0.5 + Math.random() * 0.4;
+    const geometry = new THREE.IcosahedronGeometry(radius, 0);
+    const puff = new THREE.Mesh(geometry, material);
+    puff.position.set(
+      (Math.random() - 0.5) * 1.6,
+      (Math.random() - 0.5) * 0.3,
+      (Math.random() - 0.5) * 1.6
+    );
+    cloud.add(puff);
+  }
+
+  cloud.scale.setScalar(scale);
+  return cloud;
+}
+
+const clouds = [];
+const cloudPositions = [
+  { x: -9, y: 5, z: -6 },
+  { x: 8, y: 6, z: -8 },
+  { x: -7, y: 7, z: 7 },
+  { x: 9, y: 4.5, z: 6 },
+];
+
+cloudPositions.forEach((pos) => {
+  const cloud = createCloud(0.8 + Math.random() * 0.6);
+  cloud.position.set(pos.x, pos.y, pos.z);
+  scene.add(cloud);
+  clouds.push(cloud);
+});
+
+// ---------------------------------------------------------
+// กล้อง: จำกัดมุมไม่ให้หมุนหลุดเฟรม
+// ---------------------------------------------------------
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 1.2, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.enablePan = false;
+
+controls.minDistance = 3.5;
+controls.maxDistance = 9;
+
+controls.minPolarAngle = THREE.MathUtils.degToRad(30);
+controls.maxPolarAngle = THREE.MathUtils.degToRad(75);
+
+controls.update();
+
+// ล็อกซ้าย-ขวาโดยอิงจากมุมกล้องเริ่มต้นจริง (ไม่ใช้เลขลอยๆ)
+// กันปัญหากล้องหมุนหลุดไปเห็นด้านนอกกำแพงที่ไม่ได้สร้างไว้
+const baseAzimuth = controls.getAzimuthalAngle();
+const azimuthSwing = THREE.MathUtils.degToRad(45);
+controls.minAzimuthAngle = baseAzimuth - azimuthSwing;
+controls.maxAzimuthAngle = baseAzimuth + azimuthSwing;
+
+controls.update();
+
+// ---------------------------------------------------------
+// โหลดโมเดล
+// ---------------------------------------------------------
+const loadingHint = document.getElementById("loading-hint");
+const loader = new GLTFLoader();
+
+loader.load(
+  MODEL_PATH,
+  (gltf) => {
+    contentGroup.add(gltf.scene);
+    loadingHint.style.display = "none";
+  },
+  undefined,
+  (error) => {
+    loadingHint.textContent = "หาโมเดลไม่เจอ เช็คไฟล์ที่ " + MODEL_PATH;
+    console.warn("โหลดโมเดลไม่สำเร็จ:", error);
+  }
+);
+
+// ---------------------------------------------------------
+// สลับโหมดสว่าง/มืด
+// ---------------------------------------------------------
+const toggleButton = document.getElementById("theme-toggle");
+const themeLabel = document.getElementById("theme-label");
+
+function applyTheme(dark) {
+  const t = dark ? THEME.dark : THEME.light;
+
+  scene.background = new THREE.Color(t.bg);
+  scene.fog.color = new THREE.Color(t.fog);
+  backgroundBoxMaterial.color.set(t.bg);
+  ambientLight.color.set(t.ambient);
+  ambientLight.intensity = t.ambientIntensity;
+  directionalLight.color.set(t.directional);
+  directionalLight.intensity = t.directionalIntensity;
+  lightSourceMaterial.color.set(t.sun);
+  lightGlowMaterial.color.set(t.sun);
+
+  clouds.forEach((cloud) => {
+    cloud.children.forEach((puff) => {
+      puff.material.color.set(t.cloudColor);
+    });
+  });
+
+  document.body.classList.toggle("dark", dark);
+  themeLabel.textContent = dark ? "Dark" : "Light";
+}
+
+toggleButton.addEventListener("click", () => {
+  isDark = !isDark;
+  applyTheme(isDark);
+});
+
+// ---------------------------------------------------------
+// resize
+// ---------------------------------------------------------
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ---------------------------------------------------------
+// ลูปเรนเดอร์
+// ---------------------------------------------------------
+function animate() {
+  requestAnimationFrame(animate);
+
+  const elapsed = clock.getElapsedTime();
+
+  clouds.forEach((cloud, i) => {
+    cloud.position.y += Math.sin(elapsed * 0.3 + i) * 0.0015;
+    cloud.rotation.y += 0.0006;
+  });
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+animate();
+</script>
+
+</body>
+</html>

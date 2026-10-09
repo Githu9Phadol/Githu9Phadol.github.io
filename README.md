@@ -73,7 +73,8 @@
 
 | ลำดับ | รายการผลงาน | เทคโนโลยี / รายละเอียด | ลิงก์เข้าชมผลงาน (Live Demo) |
 |:---:|---|---|:---:|
-| 🏆 | **Final Project: 3D Interactive Portfolio** | Three.js, GLSL, Blender, PBR Materials, Raycasting | 👉 [**เปิดผลงาน 3D Room**](https://githu9phadol.github.io/project/myportfoilo.html) |
+| 🏆 | **Final Project: 3D Interactive Portfolio (ฉบับสมบูรณ์)** | Three.js, GLSL, Blender, PBR Materials, Raycasting | 👉 [**เปิดผลงาน 3D Room ล่าสุด**](https://githu9phadol.github.io/project/myportfoilo.html) |
+| 📁 | **3D Room (งานส่งเดิม)** | Three.js, Blender Room Model, Controls | 👉 [**เปิดงานเดิม**](https://githu9phadol.github.io/myportfoilo.html) |
 | 1 | **งาน 1: 24bit Interactive Graphics** | HTML5 Canvas 2D, PutPixel, Sprite Rotation & Scaling | 👉 [**เปิดงาน 24bit**](https://githu9phadol.github.io/index.html) |
 | 2 | **งาน 2: Paint** | Web Paint Tool, Brush Drawing, Color Palette | 👉 [**เปิดงาน Paint**](https://githu9phadol.github.io/paint.html) |
 | 3 | **งาน 3: Raster Graphics Paint** | Rasterization Algorithms, Pixel Operations | 👉 [**เปิดงาน Raster Paint**](https://githu9phadol.github.io/raster_paint.html) |
