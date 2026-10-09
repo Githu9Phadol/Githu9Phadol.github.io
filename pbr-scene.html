@@ -82,7 +82,7 @@ const exrLoader = new EXRLoader();
 exrLoader.load(
   // 🔧 ใส่ raw URL จาก GitHub ของคุณตรงนี้ รูปแบบ:
   // https://raw.githubusercontent.com/USERNAME/REPO/BRANCH/path/to/file.exr
-  '../assets/textures/rogland_clear_night_1k.exr',
+  'https://raw.githubusercontent.com/Githu9Phadol/Githu9Phadol.github.io/main/rogland_clear_night_1k.exr',
   (texture) => {
     texture.mapping = THREE.EquirectangularReflectionMapping;
     scene.background = texture;
@@ -141,7 +141,7 @@ const gltfLoader = new GLTFLoader();
 gltfLoader.load(
   // 🔧 ใส่ raw URL จาก GitHub ของคุณตรงนี้ รูปแบบ:
   // https://raw.githubusercontent.com/USERNAME/REPO/BRANCH/path/to/model.glb
-  '../assets/models/titan_tung_tung_sahur.glb',
+  'https://raw.githubusercontent.com/Githu9Phadol/Githu9Phadol.github.io/main/titan_tung_tung_sahur.glb',
   (gltf) => {
     characterModel = gltf.scene;
     characterModel.position.set(1, 0, 0);

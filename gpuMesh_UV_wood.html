@@ -58,7 +58,7 @@ const geometry = new THREE.BufferGeometry();
         geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));  
         geometry.computeVertexNormals();
 
-        const texture = new THREE.TextureLoader().load('../assets/textures/wood_table_worn_diff_1k.jpg', t => {
+        const texture = new THREE.TextureLoader().load('https://sibsansuk.github.io/wood_table_worn_diff_1k.jpg', t => {
         });
         const mat = new THREE.MeshStandardMaterial({
             map: texture

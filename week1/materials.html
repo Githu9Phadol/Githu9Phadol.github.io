@@ -155,7 +155,7 @@ const uvs = [
 
         //load glb และใช้ pbr material
         const loader = new THREE.GLTFLoader();
-        loader.load('../../assets/models/microscope.glb', (gltf) => {
+        loader.load('https://Githu9Phadol.github.io/microscope.glb', (gltf) => {
             const model = gltf.scene;
             model.traverse((child) => {
                 if (child.isMesh) {
