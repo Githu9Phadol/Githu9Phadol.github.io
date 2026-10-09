@@ -427,13 +427,12 @@
 
     <!-- Works Navigation Section with Filter Tabs -->
     <div class="section-header">
-      <h2 class="section-title">📂 งานทั้งหมด (All Coursework)</h2>
+      <h2 class="section-title">📂 ผลงานทั้งหมด (All Works)</h2>
       <div class="filter-bar">
         <button class="filter-btn active" onclick="filterWorks('all', this)">ทั้งหมด (All)</button>
         <button class="filter-btn" onclick="filterWorks('3d', this)">🏠 3D Rooms</button>
-        <button class="filter-btn" onclick="filterWorks('2d', this)">🎮 2D & Raster</button>
-        <button class="filter-btn" onclick="filterWorks('materials', this)">💡 3D & Materials</button>
-        <button class="filter-btn" onclick="filterWorks('shaders', this)">⚡ Shaders & GPU</button>
+        <button class="filter-btn" onclick="filterWorks('2d', this)">🎨 2D Paint</button>
+        <button class="filter-btn" onclick="filterWorks('materials', this)">🔮 3D & PBR</button>
       </div>
     </div>
 
@@ -465,26 +464,14 @@
         <div class="work-arrow">เปิดผลงาน &rarr;</div>
       </a>
 
-      <!-- 2D & Raster -->
-      <a href="24bit.html" class="work-card" data-cat="2d">
-        <div class="work-card-top">
-          <div class="work-card-header">
-            <span class="work-icon">🎮</span>
-            <span class="work-cat-badge">2D Canvas</span>
-          </div>
-          <h3>งาน 1: 24bit Interactive</h3>
-          <p>การเขียนพิกเซลระดับล่าง PutPixel, การวาดเส้น และการหมุน/ย่อขยายดาบเพชร 24bit</p>
-        </div>
-        <div class="work-arrow">เปิดผลงาน &rarr;</div>
-      </a>
-
+      <!-- 2D & Paint -->
       <a href="paint.html" class="work-card" data-cat="2d">
         <div class="work-card-top">
           <div class="work-card-header">
             <span class="work-icon">🎨</span>
             <span class="work-cat-badge">2D App</span>
           </div>
-          <h3>งาน 2: Paint Tool</h3>
+          <h3>Paint Tool</h3>
           <p>เว็บแอปพลิเคชันวาดภาพระบายสี ปรับขนาดแปรง เลือกพาเลทสี และเครื่องมือวาด</p>
         </div>
         <div class="work-arrow">เปิดผลงาน &rarr;</div>
@@ -496,49 +483,13 @@
             <span class="work-icon">🖌️</span>
             <span class="work-cat-badge">Rasterization</span>
           </div>
-          <h3>งาน 3: Raster Graphics Paint</h3>
+          <h3>Raster Graphics Paint</h3>
           <p>โปรแกรมวาดภาพบนพิกเซลกริด คำนวณเส้นตรงและรูปทรงด้วยอัลกอริทึม Rasterization</p>
         </div>
         <div class="work-arrow">เปิดผลงาน &rarr;</div>
       </a>
 
-      <a href="800_Transformation.html" class="work-card" data-cat="2d">
-        <div class="work-card-top">
-          <div class="work-card-header">
-            <span class="work-icon">🔄</span>
-            <span class="work-cat-badge">2D Math</span>
-          </div>
-          <h3>2D Transformation</h3>
-          <p>การแปลงพิกัดทางเรขาคณิต Translation, Rotation, และ Scaling ด้วยเมทริกซ์ 2 มิติ</p>
-        </div>
-        <div class="work-arrow">เปิดผลงาน &rarr;</div>
-      </a>
-
-      <a href="800_raster.html" class="work-card" data-cat="2d">
-        <div class="work-card-top">
-          <div class="work-card-header">
-            <span class="work-icon">📐</span>
-            <span class="work-cat-badge">Raster Lab</span>
-          </div>
-          <h3>Raster Algorithms Lab</h3>
-          <p>ปฏิบัติการวาดเส้น Bresenham, Midpoint Circle, และการเติมสี Polygon</p>
-        </div>
-        <div class="work-arrow">เปิดผลงาน &rarr;</div>
-      </a>
-
-      <!-- 3D & Materials -->
-      <a href="Lighting.html" class="work-card" data-cat="materials">
-        <div class="work-card-top">
-          <div class="work-card-header">
-            <span class="work-icon">💡</span>
-            <span class="work-cat-badge">3D Lighting</span>
-          </div>
-          <h3>3D Lighting Studio</h3>
-          <p>ปฏิบัติการจัดแสง 3 มิติ Ambient, Directional, Point Light และเงาตกกระทบ</p>
-        </div>
-        <div class="work-arrow">เปิดผลงาน &rarr;</div>
-      </a>
-
+      <!-- 3D & PBR -->
       <a href="pbr-scene.html" class="work-card" data-cat="materials">
         <div class="work-card-top">
           <div class="work-card-header">
@@ -547,103 +498,6 @@
           </div>
           <h3>PBR Rendering Scene</h3>
           <p>การจัดแสงและการ Shading วัตถุแบบ Physically Based Rendering และ Image-Based Lighting</p>
-        </div>
-        <div class="work-arrow">เปิดผลงาน &rarr;</div>
-      </a>
-
-      <a href="gpuMeshUVknife.html" class="work-card" data-cat="materials">
-        <div class="work-card-top">
-          <div class="work-card-header">
-            <span class="work-icon">🗡️</span>
-            <span class="work-cat-badge">UV Texture</span>
-          </div>
-          <h3>Knife Texture Mapping</h3>
-          <p>การแมปพื้นผิว UV Texture ลงบนโมเดล 3 มิติ (มีด Knife Model)</p>
-        </div>
-        <div class="work-arrow">เปิดผลงาน &rarr;</div>
-      </a>
-
-      <a href="gpuMesh_UV_wood.html" class="work-card" data-cat="materials">
-        <div class="work-card-top">
-          <div class="work-card-header">
-            <span class="work-icon">🪵</span>
-            <span class="work-cat-badge">UV Texture</span>
-          </div>
-          <h3>Wood Table UV Mesh</h3>
-          <p>การขึ้นโมเดลโต๊ะไม้และการใส่ Texture ลายไม้แบบสมจริง</p>
-        </div>
-        <div class="work-arrow">เปิดผลงาน &rarr;</div>
-      </a>
-
-      <a href="gpuMesh_Vertex_UV_VertexColor.html" class="work-card" data-cat="materials">
-        <div class="work-card-top">
-          <div class="work-card-header">
-            <span class="work-icon">🌈</span>
-            <span class="work-cat-badge">Vertex Colors</span>
-          </div>
-          <h3>Vertex Color 3D Mesh</h3>
-          <p>การแสดงผลค่าสีระดับจุดยอด (Vertex Color Interpolation) ร่วมกับ UV Coordinates</p>
-        </div>
-        <div class="work-arrow">เปิดผลงาน &rarr;</div>
-      </a>
-
-      <!-- Shaders & GPU -->
-      <a href="week3/cell_shade.html" class="work-card" data-cat="shaders">
-        <div class="work-card-top">
-          <div class="work-card-header">
-            <span class="work-icon">🎭</span>
-            <span class="work-cat-badge">GLSL Shader</span>
-          </div>
-          <h3>Cel Shading (Toon Shader)</h3>
-          <p>Custom Fragment Shader สำหรับการเรนเดอร์เงาสไตล์การ์ตูน พร้อมแถบ Rim Light</p>
-        </div>
-        <div class="work-arrow">เปิดผลงาน &rarr;</div>
-      </a>
-
-      <a href="week3/800_vertex_uv_shader.html" class="work-card" data-cat="shaders">
-        <div class="work-card-top">
-          <div class="work-card-header">
-            <span class="work-icon">🌊</span>
-            <span class="work-cat-badge">GLSL Shader</span>
-          </div>
-          <h3>Vertex UV Shader</h3>
-          <p>Custom Vertex Shader การคำนวณการเคลื่อนไหวและการกระเพื่อมของจุดยอด</p>
-        </div>
-        <div class="work-arrow">เปิดผลงาน &rarr;</div>
-      </a>
-
-      <a href="week4/picking.html" class="work-card" data-cat="shaders">
-        <div class="work-card-top">
-          <div class="work-card-header">
-            <span class="work-icon">🎯</span>
-            <span class="work-cat-badge">Raycasting</span>
-          </div>
-          <h3>3D Object Picking</h3>
-          <p>ระบบตรวจจับการคลิกเลือกวัตถุ 3 มิติในพื้นที่สามมิติด้วย Three.js Raycaster</p>
-        </div>
-        <div class="work-arrow">เปิดผลงาน &rarr;</div>
-      </a>
-
-      <a href="week2/800_shader_starter.html" class="work-card" data-cat="shaders">
-        <div class="work-card-top">
-          <div class="work-card-header">
-            <span class="work-icon">⚙️</span>
-            <span class="work-cat-badge">GLSL Basic</span>
-          </div>
-          <h3>GPU Shader Starter</h3>
-          <p>โครงสร้างพื้นฐานและการคอมไพล์ Vertex & Fragment Shader บนการ์ดจอ</p>
-        </div>
-        <div class="work-arrow">เปิดผลงาน &rarr;</div>
-      </a>
-
-      <a href="800_interraction.html" class="work-card" data-cat="shaders">
-        <div class="work-card-top">
-          <div class="work-card-header">
-            <span class="work-icon">🕹️</span>
-            <span class="work-cat-badge">GPU Input</span>
-          </div>
-          <h3>GPU Interaction Lab</h3>
-          <p>การควบคุมและโต้ตอบกับวัตถุ 3 มิติผ่านเมาส์และคีย์บอร์ดแบบ Real-time</p>
         </div>
         <div class="work-arrow">เปิดผลงาน &rarr;</div>
       </a>
