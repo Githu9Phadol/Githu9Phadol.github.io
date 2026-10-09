@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<title>Next Gen Rendering - PBR Scene</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #111318; font-family: 'Segoe UI', Tahoma, sans-serif; }
+  #canvas-container { width: 100%; height: 100%; }
+  #info {
+    position: absolute; top: 12px; left: 12px; color: #eee;
+    background: rgba(0,0,0,0.5); padding: 10px 14px; border-radius: 6px;
+    font-size: 13px; line-height: 1.5; max-width: 320px; pointer-events: none;
+  }
+  #info b { color: #7fd1ff; }
+  #loading {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    color: #fff; font-size: 16px; letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+<div id="info">
+  <b>Next Gen Rendering (PBR)</b><br/>
+  ลากเมาส์ = หมุนกล้อง | scroll = ซูม<br/>
+  ปรับตำแหน่งไฟจากแผง GUI มุมขวาบน
+</div>
+<div id="loading">กำลังโหลดฉาก...</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
+import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+/* ============================================================
+   1) SCENE / CAMERA / RENDERER
+   ============================================================ */
+const container = document.getElementById('canvas-container');
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1c22); // สีพื้นชั่วคราว จนกว่าจะโหลด environment
+
+const camera = new THREE.PerspectiveCamera(
+  50, window.innerWidth / window.innerHeight, 0.1, 100
+);
+camera.position.set(3, 2.5, 5);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.5;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+container.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.target.set(0, 1, 0);
+
+/* ============================================================
+   2) ENVIRONMENT / BACKGROUND
+   ---------------------------------------------------------
+   ใส่ path ไฟล์ .exr ของคุณตรงนี้
+   HDRI (.exr) ทำหน้าที่ทั้งเป็นพื้นหลัง และเป็นแหล่งแสงสะท้อนให้วัสดุ PBR
+   ============================================================ */
+const exrLoader = new EXRLoader();
+exrLoader.load(
+  // 🔧 ใส่ raw URL จาก GitHub ของคุณตรงนี้ รูปแบบ:
+  // https://raw.githubusercontent.com/USERNAME/REPO/BRANCH/path/to/file.exr
+  'https://raw.githubusercontent.com/Githu9Phadol/Githu9Phadol.github.io/main/rogland_clear_night_1k.exr',
+  (texture) => {
+    texture.mapping = THREE.EquirectangularReflectionMapping;
+    scene.background = texture;
+    scene.environment = texture;
+  },
+  undefined,
+  (err) => {
+    console.warn('ยังไม่ได้ใส่ environment map หรือโหลดไม่สำเร็จ:', err);
+  }
+);
+
+/* ============================================================
+   3) LIGHTS (ปรับตำแหน่ง/ความเข้มได้ผ่าน GUI)
+   ============================================================ */
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+scene.add(ambientLight);
+
+const mainLight = new THREE.PointLight(0xffffff, 15, 100);
+mainLight.position.set(3, 10, 4);
+mainLight.castShadow = true;
+mainLight.shadow.mapSize.set(1024, 1024);
+scene.add(mainLight);
+
+// ลูกบอลเล็กๆ แสดงตำแหน่งไฟ ให้เห็นชัดตอนลากปรับ
+const lightHelperGeo = new THREE.SphereGeometry(0.4, 16, 16);
+const lightHelperMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+const lightHelper = new THREE.Mesh(lightHelperGeo, lightHelperMat);
+lightHelper.position.copy(mainLight.position);
+scene.add(lightHelper);
+
+/* ============================================================
+   4) GROUND / พื้น ด้วย PBR Material
+   ============================================================ */
+const groundMaterial = new THREE.MeshStandardMaterial({
+  color: 0x808080,
+  metalness: 0.05,
+  roughness: 0.85,
+});
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), groundMaterial);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+/* กล่องทดสอบ PBR ถูกลบออกแล้ว เหลือแค่พื้นกับตัวละครจริง */
+
+/* ============================================================
+   6) ตัวละครหลัก (GLTF Model)
+   ---------------------------------------------------------
+   ใส่ path ไฟล์ .glb / .gltf ของคุณตรงนี้
+   โมเดลควรมี BaseColor / Metallic / Roughness map มาด้วยแล้ว
+   ============================================================ */
+let characterModel = null;
+const characterMaterials = []; // เก็บ material ของตัวละครไว้ปรับผ่าน GUI
+
+const gltfLoader = new GLTFLoader();
+gltfLoader.load(
+  // 🔧 ใส่ raw URL จาก GitHub ของคุณตรงนี้ รูปแบบ:
+  // https://raw.githubusercontent.com/USERNAME/REPO/BRANCH/path/to/model.glb
+  'https://raw.githubusercontent.com/Githu9Phadol/Githu9Phadol.github.io/main/titan_tung_tung_sahur.glb',
+  (gltf) => {
+    characterModel = gltf.scene;
+    characterModel.position.set(1, 0, 0);
+    characterModel.scale.set(0.5, 0.5, 0.5); // 🔧 ลดขนาดโมเดลลงครึ่งหนึ่ง
+    characterModel.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        if (child.material) {
+          child.material.envMapIntensity = 1.5; // 🔧 เพิ่มแสงสะท้อนจาก environment
+          characterMaterials.push(child.material);
+        }
+      }
+    });
+    scene.add(characterModel);
+    buildMaterialGUI();
+    document.getElementById('loading').style.display = 'none';
+  },
+  undefined,
+  (err) => {
+    console.warn('ยังไม่ได้ใส่ model หรือโหลดไม่สำเร็จ:', err);
+    document.getElementById('loading').textContent =
+      'ยังไม่พบ model — ใส่ path ในโค้ดตรงคอมเมนต์ "ใส่ path ตัวละครของคุณตรงนี้"';
+  }
+);
+
+/* ============================================================
+   7) GUI CONTROLS
+   ============================================================ */
+const gui = new GUI();
+
+const exposureFolder = gui.addFolder('ความสว่างโดยรวม');
+exposureFolder.add(renderer, 'toneMappingExposure', 0, 4, 0.05).name('exposure');
+exposureFolder.add(ambientLight, 'intensity', 0, 3, 0.05).name('ambient');
+exposureFolder.open();
+
+const lightFolder = gui.addFolder('ตำแหน่งแหล่งกำเนิดแสง');
+lightFolder.add(mainLight.position, 'x', -30, 30, 0.5).onChange(syncLightHelper);
+lightFolder.add(mainLight.position, 'y', -10, 30, 0.5).onChange(syncLightHelper);
+lightFolder.add(mainLight.position, 'z', -30, 30, 0.5).onChange(syncLightHelper);
+lightFolder.add(mainLight, 'intensity', 0, 40, 0.5);
+lightFolder.addColor({ color: '#ffffff' }, 'color').onChange((v) => mainLight.color.set(v));
+lightFolder.open();
+
+function syncLightHelper() {
+  lightHelper.position.copy(mainLight.position);
+}
+
+
+// จะถูกสร้างหลัง model โหลดเสร็จ เพื่อผูกกับ material จริงของตัวละคร
+function buildMaterialGUI() {
+  if (characterMaterials.length === 0) return;
+  const mat = characterMaterials[0];
+  const charFolder = gui.addFolder('วัสดุตัวละคร (PBR)');
+  if ('metalness' in mat) charFolder.add(mat, 'metalness', 0, 1, 0.01);
+  if ('roughness' in mat) charFolder.add(mat, 'roughness', 0, 1, 0.01);
+  if ('envMapIntensity' in mat) charFolder.add(mat, 'envMapIntensity', 0, 4, 0.05);
+  if (mat.color) {
+    charFolder.addColor({ color: '#' + mat.color.getHexString() }, 'color')
+      .onChange((v) => mat.color.set(v));
+  }
+  charFolder.open();
+}
+
+/* ============================================================
+   8) RESIZE
+   ============================================================ */
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* ============================================================
+   9) ANIMATE LOOP
+   ============================================================ */
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+
+</body>
+</html>
