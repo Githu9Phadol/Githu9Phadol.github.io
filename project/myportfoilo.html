@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Interactive Portfolio — ภาดล อาจหาญศิริ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --font-sans: "Plus Jakarta Sans", "Prompt", sans-serif;
+      --bg-light: #f5f0ea;
+      --bg-dark: #121316;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      margin: 0;
+      width: 100%; height: 100%; overflow: hidden;
+      font-family: var(--font-sans);
+      background:
+        radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0) 36%),
+        radial-gradient(circle at 18% 78%, rgba(185, 160, 205, 0.45) 0%, rgba(185, 160, 205, 0) 46%),
+        radial-gradient(circle at 82% 68%, rgba(220, 190, 215, 0.35) 0%, rgba(220, 190, 215, 0) 42%),
+        linear-gradient(180deg, #88829f 0%, #b9aec3 48%, #e8dfe5 100%);
+      color: #1e293b;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+    body.dark {
+      background:
+        radial-gradient(circle at 50% 18%, rgba(125, 113, 165, 0.24) 0%, rgba(125, 113, 165, 0) 38%),
+        radial-gradient(circle at 18% 78%, rgba(88, 72, 115, 0.28) 0%, rgba(88, 72, 115, 0) 46%),
+        radial-gradient(circle at 82% 68%, rgba(112, 80, 130, 0.22) 0%, rgba(112, 80, 130, 0) 42%),
+        linear-gradient(180deg, #1b1830 0%, #2b263f 52%, #4a4059 100%);
+      color: #f8fafc;
+    }
+
+    #c { position: absolute; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
+
+    #loading-hint {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      padding: 14px 28px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px);
+      border-radius: 999px; font-weight: 500; font-size: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); pointer-events: none; z-index: 50;
+      transition: opacity 0.3s ease;
+    }
+    body.dark #loading-hint { background: rgba(30, 41, 59, 0.85); color: #f8fafc; }
+
+    #controls-hint {
+      position: fixed; top: 20px; left: 20px; padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(12px);
+      border-radius: 12px; font-size: 12px; font-weight: 500;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); pointer-events: none; z-index: 10; line-height: 1.5;
+    }
+    body.dark #controls-hint { background: rgba(30, 41, 59, 0.75); color: #94a3b8; }
+
+    #quick-nav { position: fixed; top: 20px; right: 20px; display: flex; gap: 8px; z-index: 20; }
+
+    .nav-btn, .theme-btn {
+      border: none; outline: none; cursor: pointer; padding: 8px 14px; border-radius: 999px;
+      font-family: var(--font-sans); font-size: 12px; font-weight: 600;
+      background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); color: #0f172a;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); transition: all 0.2s ease;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    body.dark .nav-btn, body.dark .theme-btn { background: rgba(30, 41, 59, 0.85); color: #f8fafc; }
+    .nav-btn:hover, .theme-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); }
+
+    #info-panel {
+      position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 20px);
+      background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(16px); color: #f8fafc;
+      padding: 12px 24px; border-radius: 999px; font-size: 13px; font-weight: 500;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25); opacity: 0; pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 20; max-width: 90vw; text-align: center;
+    }
+    #info-panel.visible { opacity: 1; transform: translate(-50%, 0); }
+
+    #cursor-ring {
+      position: fixed; width: 36px; height: 36px; border: 2px solid rgba(14, 165, 233, 0.5);
+      border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%);
+      transition: width 0.2s, height 0.2s, border-color 0.2s; z-index: 100; display: none;
+    }
+    #cursor-dot {
+      position: fixed; width: 6px; height: 6px; background: #0ea5e9;
+      border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%);
+      z-index: 101; display: none;
+    }
+    @media (pointer: fine) { #cursor-ring, #cursor-dot { display: block; } }
+  </style>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+
+<body>
+  <canvas id="c"></canvas>
+  <div id="loading-hint">กำลังโหลดผลงาน 3 มิติ...</div>
+  <div id="controls-hint">🖱️ คลิกซ้ายหมุนกล้อง &bull; คลิกขวาเลื่อน &bull; สกอร์ซูม &bull; <b>คลิกที่วัตถุ</b> เพื่อซูมดูรายละเอียด</div>
+
+  <div id="quick-nav">
+    <button class="nav-btn" data-target="Reset">🔄 มุมมองห้อง</button>
+    <button class="nav-btn" data-target="SignBoard">📋 ข้อมูลนิสิต</button>
+    <button class="nav-btn" data-target="Monitor">🖥️ จอคอม</button>
+    <button id="theme-toggle" class="theme-btn">
+      <span id="theme-icon">☀️</span> <span id="theme-label">Day</span>
+    </button>
+  </div>
+
+  <div id="info-panel"></div>
+  <div id="cursor-ring"></div>
+  <div id="cursor-dot"></div>
+
+  <script type="module">
+    import * as THREE from "three";
+    import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+    import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+    // ---------------------------------------------------------------------------
+    // 1. ค่าสีและโหมดแสง (Day / Night Theme)
+    // ---------------------------------------------------------------------------
+    const THEME = {
+      light: {
+        ambient: 0xf6f0e4, ambientIntensity: 1.05,
+        directional: 0xfff6e8, directionalIntensity: 1.45,
+        cloudColor: 0xffffff
+      },
+      dark: {
+        ambient: 0x1e2638, ambientIntensity: 0.55,
+        directional: 0x6882a6, directionalIntensity: 0.65,
+        cloudColor: 0x475569
+      }
+    };
+
+    let isDark = false;
+    const clock = new THREE.Clock();
+    const infoPanel = document.getElementById("info-panel");
+    const loadingHint = document.getElementById("loading-hint");
+
+    // ---------------------------------------------------------------------------
+    // 2. การสร้าง Scene, Camera, Renderer
+    // ---------------------------------------------------------------------------
+    const canvas = document.getElementById("c");
+    const renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      antialias: true,
+      alpha: true,
+      powerPreference: "high-performance"
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const scene = new THREE.Scene();
+    scene.background = null;
+
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(5.0, 3.5, -5.0);
+
+    const contentGroup = new THREE.Group();
+    scene.add(contentGroup);
+
+    let pickableObjects = [];
+
+    // ---------------------------------------------------------------------------
+    // 3. แสงสตูดิโอเสมือน (Studio IBL Environment)
+    // ---------------------------------------------------------------------------
+    function createStudioEnvironment(targetRenderer) {
+      const envScene = new THREE.Scene();
+      
+      const roomGeo = new THREE.BoxGeometry(14, 14, 14);
+      const roomMat = new THREE.MeshBasicMaterial({ color: 0x9aa2b4, side: THREE.BackSide });
+      envScene.add(new THREE.Mesh(roomGeo, roomMat));
+
+      const panels = [
+        { geo: [8, 8], col: 0xffffff, pos: [0, 6.8, 0], rot: [Math.PI / 2, 0, 0] },
+        { geo: [5, 8], col: 0xffffff, pos: [6.8, 2.5, 3.0], rot: [0, -Math.PI / 2, 0] },
+        { geo: [5, 8], col: 0xe8f0ff, pos: [-6.8, 2.5, -1.5], rot: [0, Math.PI / 2, 0] },
+        { geo: [9, 3], col: 0xffffff, pos: [0, 3.5, -6.8], rot: [0, 0, 0] }
+      ];
+
+      panels.forEach(p => {
+        const mesh = new THREE.Mesh(
+          new THREE.PlaneGeometry(...p.geo),
+          new THREE.MeshBasicMaterial({ color: p.col })
+        );
+        mesh.position.set(...p.pos);
+        mesh.rotation.set(...p.rot);
+        envScene.add(mesh);
+      });
+
+      const pmrem = new THREE.PMREMGenerator(targetRenderer);
+      const tex = pmrem.fromScene(envScene, 0.04).texture;
+      pmrem.dispose();
+      return tex;
+    }
+    scene.environment = createStudioEnvironment(renderer);
+
+    // ---------------------------------------------------------------------------
+    // 4. แสงสว่างหลักและเงา (Direct & Ambient Lights)
+    // ---------------------------------------------------------------------------
+    const ambientLight = new THREE.AmbientLight(THEME.light.ambient, THEME.light.ambientIntensity);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(THEME.light.directional, THEME.light.directionalIntensity);
+    directionalLight.position.set(3.2, 5.8, -3.0);
+    directionalLight.target.position.set(0, 0.4, 0);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.set(2048, 2048);
+    directionalLight.shadow.camera.near = 0.5;
+    directionalLight.shadow.camera.far = 16.0;
+
+    const d = 3.2;
+    directionalLight.shadow.camera.left = -d;
+    directionalLight.shadow.camera.right = d;
+    directionalLight.shadow.camera.top = d;
+    directionalLight.shadow.camera.bottom = -d;
+    directionalLight.shadow.bias = -0.0004;
+    directionalLight.shadow.normalBias = 0.02;
+    directionalLight.shadow.radius = 2.0;
+
+    scene.add(directionalLight);
+    scene.add(directionalLight.target);
+
+    // โคมไฟตั้งโต๊ะ
+    const deskLampLight = new THREE.SpotLight(0xffaa33, 0, 1.0, Math.PI / 7.0, 0.6, 1.0);
+    deskLampLight.position.set(-1.04, 1.02, 1.32);
+    deskLampLight.target.position.set(-0.95, 0.74, 1.22);
+    scene.add(deskLampLight);
+    scene.add(deskLampLight.target);
+
+    // ไฟนีออนเหนือโต๊ะ
+    const lampBarLight = new THREE.SpotLight(0xfff5ea, 0, 3.2, Math.PI / 3, 0.95, 1.2);
+    lampBarLight.position.set(-0.60, 1.65, 1.55);
+    lampBarLight.target.position.set(-0.60, 0.72, 1.25);
+    lampBarLight.castShadow = true;
+    lampBarLight.shadow.mapSize.set(1024, 1024);
+    lampBarLight.shadow.camera.near = 0.1;
+    lampBarLight.shadow.camera.far = 2.5;
+    lampBarLight.shadow.bias = -0.001;
+    scene.add(lampBarLight);
+    scene.add(lampBarLight.target);
+
+    const barDiffuseLight = new THREE.PointLight(0xfff7ed, 0, 3.2, 1.6);
+    barDiffuseLight.position.set(-0.60, 1.58, 1.40);
+    scene.add(barDiffuseLight);
+
+    // ไฟส่องป้ายข้อมูลนิสิต
+    const plaqueLight = new THREE.SpotLight(0xfff5ea, 1.4, 3.5, Math.PI / 3.5, 0.7, 1.2);
+    plaqueLight.position.set(-1.00, 1.80, -1.035);
+    plaqueLight.target.position.set(-1.63, 1.30, -1.035);
+    scene.add(plaqueLight);
+    scene.add(plaqueLight.target);
+
+    let deskLampBulbMat = null;
+    let lampBarMat = null;
+    let cloudMat = null;
+    const clouds = [];
+    const texLoader = new THREE.TextureLoader();
+
+    // ---------------------------------------------------------------------------
+    // 5. ตัวควบคุมมุมมองกล้อง (OrbitControls)
+    // ---------------------------------------------------------------------------
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, 1.0, 0);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.enablePan = false;
+
+    // จำกัดระยะซูมเข้า-ออก (ซูมดูโค้ดบนจอได้ใกล้ถึง 0.35m และไม่ถอยไกลเกินไป)
+    controls.minDistance = 0.35;
+    controls.maxDistance = 8.8;
+
+    // จำกัดมุมก้ม-เงย (ก้มดูสิ่งของบนโต๊ะได้ชัด และไม่มุดใต้พื้น)
+    controls.minPolarAngle = THREE.MathUtils.degToRad(35);
+    controls.maxPolarAngle = THREE.MathUtils.degToRad(88);
+
+    // จำกัดมุมหมุนซ้าย-ขวา (หมุนดูรอบด้านหน้าห้องได้เต็มที่ 100° และล็อคไม่ให้หลุดไปเห็นกำแพงสีขาวด้านหลัง)
+    controls.minAzimuthAngle = THREE.MathUtils.degToRad(85);
+    controls.maxAzimuthAngle = THREE.MathUtils.degToRad(185);
+
+    controls.update();
+
+    // ---------------------------------------------------------------------------
+    // 6. Custom Shaders: Cel Shading (เงาการ์ตูน)
+    // ---------------------------------------------------------------------------
+    const celVertexShader = `
+      varying vec3 vNormalW;
+      varying vec3 vPosW;
+
+      void main() {
+        vec4 worldPos = modelMatrix * vec4(position, 1.0);
+        vPosW = worldPos.xyz;
+        vNormalW = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+        gl_Position = projectionMatrix * viewMatrix * worldPos;
+      }
+    `;
+
+    const celFragmentShader = `
+      precision mediump float;
+
+      uniform vec3 uBaseColor;
+      uniform vec3 uShadowColor;
+      uniform vec3 uLightDir;
+      uniform float uLevels;
+      uniform float uSpecular;
+      uniform float uAmbient;
+
+      varying vec3 vNormalW;
+      varying vec3 vPosW;
+
+      void main() {
+        vec3 N = normalize(vNormalW);
+        vec3 L = normalize(uLightDir);
+        vec3 V = normalize(cameraPosition - vPosW);
+
+        float diff = max(max(dot(N, L), 0.0), max(dot(N, V), 0.0) * 0.70);
+        float toon = floor(diff * uLevels) / uLevels;
+        vec3 col = mix(uShadowColor, uBaseColor, uAmbient + (1.0 - uAmbient) * toon);
+
+        vec3 H = normalize(L + V);
+        float spec = step(0.48, pow(max(dot(N, H), 0.0), 32.0)) * uSpecular;
+        float rim = step(0.50, pow(1.0 - max(dot(N, V), 0.0), 2.2)) * 0.45;
+
+        gl_FragColor = vec4(col + vec3(spec) + uBaseColor * rim, 1.0);
+      }
+    `;
+
+    function createCelMat(baseHex, shadowHex, levels = 3.0, specular = 0.35, ambient = 0.30) {
+      return new THREE.ShaderMaterial({
+        vertexShader: celVertexShader,
+        fragmentShader: celFragmentShader,
+        uniforms: {
+          uBaseColor:   { value: new THREE.Color(baseHex) },
+          uShadowColor: { value: new THREE.Color(shadowHex) },
+          uLightDir:    { value: new THREE.Vector3(3.2, 5.8, -3.0).normalize() },
+          uLevels:      { value: levels },
+          uSpecular:    { value: specular },
+          uAmbient:     { value: ambient }
+        }
+      });
+    }
+
+    const chairCelMaterial    = createCelMat(0x3e526d, 0x1e2736, 2.5, 0.40, 0.28);
+    const keyboardCelMaterial = createCelMat(0xf2eee3, 0x544e42, 4.0, 0.35, 0.32);
+    const mouseCelMaterial    = createCelMat(0x282c35, 0x13151a, 3.0, 0.55, 0.30);
+
+    // ---------------------------------------------------------------------------
+    // 7. Custom Shaders: เคสคอมพิวเตอร์พร้อมพัดลมไฟ RGB
+    // ---------------------------------------------------------------------------
+    const computerUniforms = {
+      uTime:     { value: 0.0 },
+      uLightDir: { value: new THREE.Vector3(3.2, 5.8, -3.0).normalize() }
+    };
+
+    const computerVertexShader = `
+      varying vec3 vNormalW;
+      varying vec3 vPosW;
+      varying vec3 vLocalPos;
+      varying vec3 vLocalNormal;
+
+      void main() {
+        vLocalPos = position;
+        vLocalNormal = normal;
+        vec4 worldPos = modelMatrix * vec4(position, 1.0);
+        vPosW = worldPos.xyz;
+        vNormalW = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+        gl_Position = projectionMatrix * viewMatrix * worldPos;
+      }
+    `;
+
+    const computerFragmentShader = `
+      precision mediump float;
+
+      uniform float uTime;
+      uniform vec3 uLightDir;
+
+      varying vec3 vNormalW;
+      varying vec3 vPosW;
+      varying vec3 vLocalPos;
+      varying vec3 vLocalNormal;
+
+      void main() {
+        vec3 N = normalize(vNormalW);
+        vec3 L = normalize(uLightDir);
+        vec3 V = normalize(cameraPosition - vPosW);
+
+        // Stepped Diffuse Cel Shading บนเคสโลหะ
+        float diff1 = max(dot(N, L), 0.0);
+        float diff2 = max(dot(N, V), 0.0) * 0.70;
+        float diff = max(diff1, diff2);
+
+        float toon = floor(diff * 3.0) / 3.0;
+        vec3 baseChassis = vec3(0.32, 0.36, 0.44);
+        vec3 midChassis  = vec3(0.18, 0.22, 0.28);
+        vec3 darkChassis = vec3(0.10, 0.12, 0.16);
+        vec3 col = mix(darkChassis, mix(midChassis, baseChassis, toon * 1.5 - 0.5), step(0.33, toon));
+
+        // 1. ฝากระจกนิรภัยด้านข้าง (+X ฝั่งมองเห็นโต๊ะและห้อง)
+        if (vLocalNormal.x > 0.8) {
+          col = vec3(0.07, 0.08, 0.10);
+          float glassGlint = pow(1.0 - max(dot(N, V), 0.0), 3.0) * 0.25;
+          col += vec3(glassGlint);
+
+          // พัดลมระบายความร้อนไฟ RGB 2 ตัวข้างใน
+          vec2 p = vec2(vLocalPos.z, vLocalPos.y);
+          vec2 fan1 = vec2(0.0, 0.20);
+          vec2 fan2 = vec2(0.0, -0.20);
+          float d1 = length(p - fan1);
+          float d2 = length(p - fan2);
+
+          vec3 rgb1 = 0.5 + 0.5 * cos(uTime * 2.5 + vec3(0.0, 2.0, 4.0));
+          vec3 rgb2 = 0.5 + 0.5 * cos(uTime * 2.5 + 2.1 + vec3(0.0, 2.0, 4.0));
+
+          // วงแหวน RGB รอบพัดลม
+          float ring1 = smoothstep(0.025, 0.005, abs(d1 - 0.16));
+          float ring2 = smoothstep(0.025, 0.005, abs(d2 - 0.16));
+
+          // ดุมตรงกลางพัดลม
+          float hub1 = smoothstep(0.05, 0.03, d1);
+          float hub2 = smoothstep(0.05, 0.03, d2);
+
+          // ใบพัดหมุน RGB
+          float a1 = atan(p.y - fan1.y, p.x - fan1.x) + uTime * 6.0;
+          float a2 = atan(p.y - fan2.y, p.x - fan2.x) + uTime * 6.0;
+          float blade1 = sin(a1 * 7.0) * step(0.04, d1) * step(d1, 0.155) * 0.45;
+          float blade2 = sin(a2 * 7.0) * step(0.04, d2) * step(d2, 0.155) * 0.45;
+
+          col += rgb1 * (ring1 * 1.8 + hub1 * 1.2 + blade1);
+          col += rgb2 * (ring2 * 1.8 + hub2 * 1.2 + blade2);
+
+          // แท่งแรม RGB
+          if (p.x > 0.08 && p.x < 0.14 && p.y > -0.05 && p.y < 0.15) {
+            vec3 ramRgb = 0.5 + 0.5 * cos(uTime * 3.0 + p.y * 12.0 + vec3(0.0, 2.0, 4.0));
+            col += ramRgb * 1.5;
+          }
+        }
+
+        // 2. ด้านหน้าเคส (-Z ฝั่งหันเข้าหาผู้ใช้และเก้าอี้)
+        if (vLocalNormal.z < -0.8) {
+          // แถบไฟ RGB แนวดิ่งตรงกลางหน้าเคส
+          if (abs(vLocalPos.x) < 0.025 && vLocalPos.y > -0.42 && vLocalPos.y < 0.42) {
+            vec3 frontRgb = 0.5 + 0.5 * cos(uTime * 2.5 + vLocalPos.y * 5.0 + vec3(0.0, 2.0, 4.0));
+            col = frontRgb * 1.8;
+          }
+          // ปุ่ม Power กลมเรืองแสงสีฟ้าด้านบน
+          if (length(vec2(vLocalPos.x, vLocalPos.y - 0.38)) < 0.025) {
+            col = vec3(0.3, 0.8, 1.0) * 1.8;
+          }
+        }
+
+        // 3. Toon Rim Light
+        float rim = pow(1.0 - max(dot(N, V), 0.0), 3.0);
+        col += vec3(0.35, 0.50, 0.70) * step(0.65, rim) * 0.25;
+
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `;
+
+    const computerCelMaterial = new THREE.ShaderMaterial({
+      vertexShader: computerVertexShader,
+      fragmentShader: computerFragmentShader,
+      uniforms: computerUniforms
+    });
+
+    // ---------------------------------------------------------------------------
+    // 8. Custom Shaders & Texture: จอมอนิเตอร์แสดงโค้ดพร้อมเคอร์เซอร์กระพริบ
+    // ---------------------------------------------------------------------------
+    const screenCanvas = document.createElement("canvas");
+    screenCanvas.width = 1024;
+    screenCanvas.height = 960;
+    const screenCtx = screenCanvas.getContext("2d");
+
+    function drawMonitorScreen(blink) {
+      const w = 1024;
+      const h = 960;
+
+      screenCtx.fillStyle = "#080c14";
+      screenCtx.fillRect(0, 0, w, h);
+
+      // แถบ Title bar ด้านบน
+      screenCtx.fillStyle = "#111827";
+      screenCtx.fillRect(0, 0, w, 84);
+
+      const dots = [
+        { x: 45, c: "#ff5f56" },
+        { x: 85, c: "#ffbd2e" },
+        { x: 125, c: "#27c93f" }
+      ];
+      dots.forEach(d => {
+        screenCtx.beginPath();
+        screenCtx.arc(d.x, 42, 13, 0, Math.PI * 2);
+        screenCtx.fillStyle = d.c;
+        screenCtx.fill();
+      });
+
+      screenCtx.font = "bold 28px monospace";
+      screenCtx.fillStyle = "#94a3b8";
+      screenCtx.textAlign = "center";
+      screenCtx.fillText("main.py", w / 2, 52);
+
+      screenCtx.strokeStyle = "#1f2937";
+      screenCtx.lineWidth = 3;
+      screenCtx.beginPath();
+      screenCtx.moveTo(0, 84);
+      screenCtx.lineTo(w, 84);
+      screenCtx.stroke();
+
+      // บรรทัดโค้ด print("hello world")
+      screenCtx.textAlign = "left";
+      screenCtx.font = "bold 72px monospace";
+      let x = 70;
+      const y1 = 360;
+
+      const tokens = [
+        { t: "print", c: "#38bdf8" },
+        { t: "(", c: "#f8fafc" },
+        { t: '"hello world"', c: "#4ade80" },
+        { t: ")", c: "#f8fafc" }
+      ];
+
+      tokens.forEach(tok => {
+        screenCtx.fillStyle = tok.c;
+        screenCtx.fillText(tok.t, x, y1);
+        x += screenCtx.measureText(tok.t).width;
+      });
+
+      if (blink) {
+        screenCtx.fillStyle = "#facc15";
+        screenCtx.fillText("_", x + 6, y1);
+      }
+
+      // ข้อความ Output
+      screenCtx.font = "bold 64px monospace";
+      screenCtx.fillStyle = "#ffffff";
+      screenCtx.fillText("hello world", 70, 500);
+
+      screenCtx.font = "bold 60px monospace";
+      screenCtx.fillStyle = "#64748b";
+      screenCtx.fillText(">", 70, 640);
+
+      // Status bar ด้านล่าง
+      screenCtx.fillStyle = "#0f172a";
+      screenCtx.fillRect(0, h - 54, w, 54);
+      screenCtx.font = "600 24px monospace";
+      screenCtx.fillText("UTF-8   Python 3.12   Ready", 40, h - 18);
+    }
+
+    drawMonitorScreen(true);
+    const screenTexture = new THREE.CanvasTexture(screenCanvas);
+    screenTexture.colorSpace = THREE.SRGBColorSpace;
+    let lastBlinkState = true;
+
+    const monitorUniforms = {
+      uScreenTex: { value: screenTexture },
+      uLightDir:  { value: new THREE.Vector3(3.2, 5.8, -3.0).normalize() }
+    };
+
+    const monitorVertexShader = `
+      varying vec3 vNormalW;
+      varying vec3 vPosW;
+      varying vec3 vLocalPos;
+      varying vec3 vLocalNormal;
+
+      void main() {
+        vLocalPos = position;
+        vLocalNormal = normal;
+        vec4 worldPos = modelMatrix * vec4(position, 1.0);
+        vPosW = worldPos.xyz;
+        vNormalW = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+        gl_Position = projectionMatrix * viewMatrix * worldPos;
+      }
+    `;
+
+    const monitorFragmentShader = `
+      precision mediump float;
+
+      uniform sampler2D uScreenTex;
+      uniform vec3 uLightDir;
+
+      varying vec3 vNormalW;
+      varying vec3 vPosW;
+      varying vec3 vLocalPos;
+      varying vec3 vLocalNormal;
+
+      void main() {
+        vec3 N = normalize(vNormalW);
+        vec3 L = normalize(uLightDir);
+        vec3 V = normalize(cameraPosition - vPosW);
+
+        bool isFrontFace = (vLocalNormal.z < -0.8 && vLocalPos.z < 0.0 && vLocalPos.y > -0.55);
+        bool isBezel = (abs(vLocalPos.x) > 0.43 || vLocalPos.y > 0.43 || vLocalPos.y < -0.38);
+
+        if (isFrontFace && !isBezel) {
+          vec2 uv = vec2((0.43 - vLocalPos.x) / 0.86, (vLocalPos.y + 0.38) / 0.81);
+          vec3 scrCol = texture2D(uScreenTex, uv).rgb;
+          float viewDot = max(dot(N, V), 0.0);
+          float angleStep = floor(viewDot * 3.0) / 3.0;
+          scrCol = mix(scrCol * 0.45, scrCol, 0.45 + 0.55 * angleStep);
+
+          vec3 H = normalize(L + V);
+          float glint = step(0.65, pow(max(dot(N, H), 0.0), 32.0)) * 0.20;
+          gl_FragColor = vec4(scrCol + vec3(glint), 1.0);
+        } else {
+          float toon = floor(max(dot(N, L), 0.0) * 2.0) / 2.0;
+          gl_FragColor = vec4(vec3(0.12, 0.14, 0.18) * (0.35 + 0.65 * toon), 1.0);
+        }
+      }
+    `;
+
+    const monitorCelMaterial = new THREE.ShaderMaterial({
+      vertexShader: monitorVertexShader,
+      fragmentShader: monitorFragmentShader,
+      uniforms: monitorUniforms
+    });
+
+    // ---------------------------------------------------------------------------
+    // 9. Custom Shaders: ยอดใบไม้พลิ้วไหว (Vertex Displacement)
+    // ---------------------------------------------------------------------------
+    const plantUniforms = { uTime: { value: 0.0 } };
+
+    const plantVertexShader = `
+      uniform float uTime;
+      varying vec3 vNormalW;
+      varying vec3 vPosW;
+      varying vec3 vLocalPos;
+
+      void main() {
+        vLocalPos = position;
+        vec3 pos = position;
+        float h = smoothstep(0.02, 0.45, pos.y);
+        pos.x += sin(uTime * 2.5 + pos.y * 7.0 + pos.x * 4.0) * 0.035 * h;
+        pos.z += cos(uTime * 3.2 + pos.y * 5.0 + pos.z * 4.0) * 0.022 * h;
+
+        vec4 worldPos = modelMatrix * vec4(pos, 1.0);
+        vPosW = worldPos.xyz;
+        vNormalW = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+        gl_Position = projectionMatrix * viewMatrix * worldPos;
+      }
+    `;
+
+    const plantFragmentShader = `
+      precision mediump float;
+
+      uniform float uTime;
+      varying vec3 vNormalW;
+      varying vec3 vPosW;
+      varying vec3 vLocalPos;
+
+      void main() {
+        vec3 N = normalize(vNormalW);
+        vec3 L = normalize(vec3(3.2, 5.8, -3.0));
+        vec3 V = normalize(cameraPosition - vPosW);
+
+        float diff = max(dot(N, L), 0.0);
+        float toon = smoothstep(0.25, 0.30, diff) * 0.5 + smoothstep(0.60, 0.65, diff) * 0.5;
+        float sss = pow(max(dot(-L, V), 0.0), 3.0) * 0.45;
+        float hGrad = clamp(vLocalPos.y / 0.50, 0.0, 1.0) * 0.35;
+
+        vec3 col = mix(
+          mix(vec3(0.08, 0.26, 0.15), vec3(0.18, 0.58, 0.32), toon),
+          vec3(0.52, 0.86, 0.42),
+          clamp(sss + hGrad, 0.0, 0.8)
+        );
+
+        vec3 H = normalize(L + V);
+        col += vec3(0.85, 1.0, 0.85) * step(0.70, pow(max(dot(N, H), 0.0), 32.0)) * 0.35;
+
+        // ขอบเรืองแสงรอบใบไม้ (Toon Rim Contour)
+        float rim = pow(1.0 - max(dot(N, V), 0.0), 3.0);
+        col += vec3(0.60, 0.95, 0.65) * step(0.65, rim) * 0.25;
+
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `;
+
+    const plantMaterial = new THREE.ShaderMaterial({
+      vertexShader: plantVertexShader,
+      fragmentShader: plantFragmentShader,
+      uniforms: plantUniforms,
+      side: THREE.DoubleSide
+    });
+
+    // ---------------------------------------------------------------------------
+    // 10. Custom Shaders: ผิวน้ำกาแฟกระเพื่อม (Vertex Displacement)
+    // ---------------------------------------------------------------------------
+    const coffeeUniforms = { uTime: { value: 0.0 } };
+
+    const coffeeVertexShader = `
+      uniform float uTime;
+      varying vec3 vNormalW;
+      varying vec3 vPosW;
+      varying vec3 vLocalPos;
+
+      void main() {
+        vLocalPos = position;
+        vec3 pos = position;
+        pos.y += sin(length(pos.xz) * 55.0 - uTime * 4.5) * 0.005;
+
+        vec4 worldPos = modelMatrix * vec4(pos, 1.0);
+        vPosW = worldPos.xyz;
+        vNormalW = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+        gl_Position = projectionMatrix * viewMatrix * worldPos;
+      }
+    `;
+
+    const coffeeFragmentShader = `
+      precision mediump float;
+
+      uniform float uTime;
+      varying vec3 vNormalW;
+      varying vec3 vPosW;
+      varying vec3 vLocalPos;
+
+      void main() {
+        vec3 N = normalize(vNormalW);
+        vec3 L = normalize(vec3(3.2, 5.8, -3.0));
+        vec3 V = normalize(cameraPosition - vPosW);
+
+        float r = length(vLocalPos.xz);
+        vec3 col = mix(vec3(0.14, 0.07, 0.04), vec3(0.78, 0.58, 0.36), smoothstep(0.02, 0.05, r) * 0.75);
+        col *= (0.45 + 0.55 * max(dot(N, L), 0.0));
+
+        vec3 H = normalize(L + V);
+        col += vec3(0.9, 0.8, 0.7) * step(0.65, pow(max(dot(N, H), 0.0), 32.0)) * 0.4;
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `;
+
+    const coffeeMaterial = new THREE.ShaderMaterial({
+      vertexShader: coffeeVertexShader,
+      fragmentShader: coffeeFragmentShader,
+      uniforms: coffeeUniforms,
+      side: THREE.DoubleSide
+    });
+
+    // ---------------------------------------------------------------------------
+    // 11. ละอองควันกาแฟ (Coffee Steam Particles)
+    // ---------------------------------------------------------------------------
+    function createCoffeeSteamTexture() {
+      const cvs = document.createElement("canvas");
+      cvs.width = 64;
+      cvs.height = 64;
+      const ctx = cvs.getContext("2d");
+
+      const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grad.addColorStop(0.0, "rgba(255, 255, 255, 0.95)");
+      grad.addColorStop(0.2, "rgba(250, 248, 245, 0.65)");
+      grad.addColorStop(0.5, "rgba(240, 235, 230, 0.22)");
+      grad.addColorStop(1.0, "rgba(255, 255, 255, 0.0)");
+
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 64, 64);
+      return new THREE.CanvasTexture(cvs);
+    }
+
+    const steamCount = 42;
+    const steamLifetime = 2.4;
+    const steamPositions = new Float32Array(steamCount * 3);
+    const steamBirth = new Float32Array(steamCount);
+    const steamSeed = new Float32Array(steamCount * 3);
+
+    for (let i = 0; i < steamCount; i++) {
+      steamPositions[i * 3 + 0] = -0.25;
+      steamPositions[i * 3 + 1] = 0.825;
+      steamPositions[i * 3 + 2] = 1.15;
+      steamBirth[i] = (i / steamCount) * steamLifetime;
+      steamSeed[i * 3 + 0] = i * 1.618;
+      steamSeed[i * 3 + 1] = 0.006 + (i % 5) * 0.0035;
+      steamSeed[i * 3 + 2] = (i * 2.39996) % (Math.PI * 2);
+    }
+
+    const steamGeo = new THREE.BufferGeometry();
+    steamGeo.setAttribute("position", new THREE.BufferAttribute(steamPositions, 3));
+    steamGeo.setAttribute("aBirth", new THREE.BufferAttribute(steamBirth, 1));
+    steamGeo.setAttribute("aSeed", new THREE.BufferAttribute(steamSeed, 3));
+
+    const steamUniforms = {
+      uTime:     { value: 0.0 },
+      uLifetime: { value: steamLifetime },
+      uTexture:  { value: createCoffeeSteamTexture() },
+      uColor:    { value: new THREE.Color(0xfbf6ee) }
+    };
+
+    const steamVertexShader = `
+      uniform float uTime;
+      uniform float uLifetime;
+
+      attribute float aBirth;
+      attribute vec3 aSeed;
+
+      varying float vAlpha;
+
+      void main() {
+        float age = mod(uTime - aBirth, uLifetime) / uLifetime;
+        float y = 0.825 + age * 0.22;
+        float angle = aSeed.z + age * 2.2 + sin(uTime * 1.2 + aSeed.x) * 0.35;
+        float r = aSeed.y * (1.0 + age * 1.6);
+        float drift = sin(age * 3.14159) * 0.012;
+
+        vec4 mv = modelViewMatrix * vec4(
+          -0.25 + r * cos(angle) + drift * sin(uTime + aSeed.x),
+          y,
+          1.15 + r * sin(angle) + drift * cos(uTime + aSeed.x),
+          1.0
+        );
+
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = clamp((14.0 + age * 26.0) * (300.0 / -mv.z), 4.0, 80.0);
+        vAlpha = smoothstep(0.0, 0.22, age) * (1.0 - smoothstep(0.55, 1.0, age)) * 0.30;
+      }
+    `;
+
+    const steamFragmentShader = `
+      uniform sampler2D uTexture;
+      uniform vec3 uColor;
+      varying float vAlpha;
+
+      void main() {
+        vec4 t = texture2D(uTexture, gl_PointCoord);
+        float a = t.a * vAlpha;
+        if (a < 0.005) discard;
+        gl_FragColor = vec4(uColor, a);
+      }
+    `;
+
+    const steamMaterial = new THREE.ShaderMaterial({
+      vertexShader: steamVertexShader,
+      fragmentShader: steamFragmentShader,
+      uniforms: steamUniforms,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.NormalBlending
+    });
+
+    const coffeeSteam = new THREE.Points(steamGeo, steamMaterial);
+    coffeeSteam.name = "CoffeeSteam";
+    contentGroup.add(coffeeSteam);
+
+    // ---------------------------------------------------------------------------
+    // 12. Phong & Lambert Shading Materials
+    // ---------------------------------------------------------------------------
+    const headphonesPhongMaterial = new THREE.MeshPhongMaterial({ color: 0x2e466e, specular: 0x93a8c6, shininess: 75 });
+    const fanPhongMaterial        = new THREE.MeshPhongMaterial({ color: 0x3d4756, specular: 0x8a96a6, shininess: 40 });
+    const cabinetLambertMaterial  = new THREE.MeshLambertMaterial({ color: 0x9c6d3d });
+
+    const bookColors = [0xb91c1c, 0x1d4ed8, 0x047857, 0xb45309, 0x6d28d9, 0x0f766e, 0xbe185d, 0x334155, 0xd97706, 0x0284c7, 0x059669];
+    const bookLambertMaterials = bookColors.map(c => new THREE.MeshLambertMaterial({ color: c }));
+
+    // ---------------------------------------------------------------------------
+    // 13. ข้อมูลตำแหน่งกล้องและคำอธิบายวัตถุ (Raycaster / Focus Targets)
+    // ---------------------------------------------------------------------------
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    const camTarget = new THREE.Vector3().copy(camera.position);
+    const lookTarget = new THREE.Vector3().copy(controls.target);
+    const lerpStartCam = new THREE.Vector3().copy(camera.position);
+    const lerpStartLook = new THREE.Vector3().copy(controls.target);
+    let isLerping = false;
+    let lerpProgress = 1.0;
+
+    function focusTarget(targetCam, targetLook, text) {
+      lerpStartCam.copy(camera.position);
+      lerpStartLook.copy(controls.target);
+      
+      if (Array.isArray(targetCam)) camTarget.set(...targetCam);
+      else camTarget.copy(targetCam);
+
+      if (Array.isArray(targetLook)) lookTarget.set(...targetLook);
+      else lookTarget.copy(targetLook);
+
+      lerpProgress = 0;
+      isLerping = true;
+      if (text) {
+        showInfo(text);
+      }
+    }
+
+    // ตารางตำแหน่งกล้องและคำอธิบายชิ้นงานแบบ Tabular
+    const PICK_INFO = {
+      "Reset":               { cam: [5.0, 3.5, -5.0],      look: [0.0, 1.0, 0.0],       text: "🏠 มุมมองรวมห้อง" },
+      "Monitor":             { cam: [-0.60, 1.10, 0.95],   look: [-0.60, 1.02, 1.325],  text: "🖥️ Monitor — Cel Shading แสดงโค้ดพร้อมเคอร์เซอร์กระพริบ" },
+      "Computer":            { cam: [0.40, 1.20, 0.85],    look: [-0.05, 1.02, 1.325],  text: "💻 Computer — Cel Shading เคสคอมพิวเตอร์พร้อมไฟ RGB" },
+      "Keyboard":            { cam: [-0.60, 1.12, 0.80],   look: [-0.60, 0.78, 1.175],  text: "⌨️ Keyboard — Cel Shading คีย์บอร์ดเงาการ์ตูน" },
+      "Mouse":               { cam: [-1.039, 1.05, 0.90],  look: [-1.039, 0.76, 1.175], text: "🖱️ Mouse — Cel Shading เมาส์เงาการ์ตูน" },
+      "Chair":               { cam: [0.10, 0.95, -0.05],   look: [-0.60, 0.55, 0.575],  text: "🪑 Chair — Cel Shading เงาการ์ตูน 3 ระดับ" },
+      "Shelf_Trophy":        { cam: [-0.95, 1.85, 1.20],   look: [-1.525, 1.81, 1.20],  text: "🏆 Trophy — ถ้วยรางวัลทองคำ PBR Metal พร้อมฐานหินอ่อน" },
+      "Shelf_Plant":         { cam: [0.85, 1.18, 1.10],    look: [0.33, 0.95, 1.45],    text: "🌿 Plant — Vertex Shader ยอดใบไม้พลิ้วไหวตามลม" },
+      "Desk_CoffeeMug":      { cam: [-0.25, 1.05, 0.90],   look: [-0.25, 0.79, 1.150],  text: "☕ Coffee Mug — Vertex Shader ผิวน้ำกระเพื่อม พร้อมควันลอย" },
+      "PictureFrame":        { cam: [-0.75, 1.70, 0.00],   look: [-1.65, 1.70, 0.00],   text: "🖼️ Picture Frame — Texture Mapping รูปโปรไฟล์" },
+      "Desk_Lamp":           { cam: [-0.75, 1.10, 0.95],   look: [-1.15, 0.90, 1.45],   text: "💡 Desk Lamp — โคมไฟตั้งโต๊ะ ส่องแสงสีส้มอบอุ่น" },
+      "Lampbar":             { cam: [-0.60, 1.65, 0.95],   look: [-0.60, 1.70, 1.65],   text: "💡 Lamp Bar — หลอดไฟนีออนติดผนัง" },
+      "SignBoard":           { cam: [-0.55, 1.30, -1.035], look: [-1.634, 1.30, -1.035], text: "📋 ข้อมูลนิสิต — ภาดล อาจหาญศิริ รหัส 6721651670 ภาควิชาวิทยาการคำนวณและเทคโนโลยีดิจิทัล คณะศิลปศาสตร์และวิทยาศาสตร์ มหาวิทยาลัยเกษตรศาสตร์" },
+      "StudentInfo_3DText":  { cam: [-0.55, 1.30, -1.035], look: [-1.634, 1.30, -1.035], text: "📋 ข้อมูลนิสิต — ภาดล อาจหาญศิริ รหัส 6721651670 ภาควิชาวิทยาการคำนวณและเทคโนโลยีดิจิทัล คณะศิลปศาสตร์และวิทยาศาสตร์ มหาวิทยาลัยเกษตรศาสตร์" },
+      "Cabinet":             { cam: [0.65, 0.65, 0.65],    look: [0.33, 0.38, 1.325],   text: "🗄️ Cabinet — Lambert Shading ผิวด้าน กระจายแสงนุ่มนวล" },
+      "Headphones":          { cam: [0.65, 1.05, 0.80],    look: [0.33, 0.85, 1.16],    text: "🎧 Headphones — Phong Shading ผิวมันวาว มีไฮไลต์สะท้อนแสง" },
+      "Table":               { cam: [0.10, 1.25, 0.60],    look: [-0.60, 0.75, 1.325],  text: "🪵 Desk — โต๊ะทำงานไม้โอ๊ค" },
+      "Desk_Mat":            { cam: [-0.60, 1.15, 0.75],   look: [-0.70, 0.75, 1.175],  text: "🪵 Desk Mat — แผ่นรองโต๊ะทำงาน" },
+      "Shelf":               { cam: [-0.95, 1.82, 1.20],   look: [-1.525, 1.70, 1.20],  text: "📚 Shelf — ชั้นวางของไม้โอ๊ค" },
+      "Shelf_BooksFlat":     { cam: [-0.95, 1.82, 0.92],   look: [-1.525, 1.70, 0.92],  text: "📚 Books — หนังสืองานศิลปะและดีไซน์" },
+      "Shelf_BooksStanding": { cam: [-0.95, 1.85, 1.474],  look: [-1.525, 1.83, 1.474], text: "📚 Books — Lambert Shading ผิวด้าน กระจายแสงนุ่มนวล" },
+      "Shelf_Clock":         { cam: [-0.95, 1.82, 0.92],   look: [-1.525, 1.815, 0.92], text: "⏰ Digital Clock — นาฬิกาดิจิทัลบล็อกไม้ LED" },
+      "Room_Rug":            { cam: [0.50, 1.10, -0.10],   look: [-0.60, 0.10, 0.75],   text: "🧶 Rug — พรมปูพื้นทอเส้นใยธรรมชาติ" },
+      "Fan_Base":            { cam: [1.20, 1.15, -1.25],   look: [1.20, 0.95, -0.30],   text: "💨 Fan — พัดลมตั้งพื้นหมุนส่ายและใบพัดหมุน" },
+      "Fan_Head":            { cam: [1.20, 1.15, -1.25],   look: [1.20, 0.95, -0.30],   text: "💨 Fan — Phong Shading ผิวมันเงา พร้อมพัดลมส่ายและใบพัดหมุน" },
+      "Fan_Blades":          { cam: [1.20, 1.15, -1.25],   look: [1.20, 0.95, -0.30],   text: "💨 Fan — พัดลมตั้งพื้นหมุนส่ายและใบพัดหมุน" }
+    };
+
+    let panelTimer = null;
+    function showInfo(text) {
+      clearTimeout(panelTimer);
+      infoPanel.textContent = text;
+      infoPanel.classList.add("visible");
+      panelTimer = setTimeout(() => {
+        infoPanel.classList.remove("visible");
+      }, 4500);
+    }
+
+    // ---------------------------------------------------------------------------
+    // 14. การโหลดโมเดล GLB และกำหนด Material ให้ชิ้นงาน
+    // ---------------------------------------------------------------------------
+    let fanHead = null;
+    let fanBlades = null;
+
+    const celMap = {
+      Chair: chairCelMaterial,
+      Computer: computerCelMaterial,
+      Monitor: monitorCelMaterial,
+      Keyboard: keyboardCelMaterial,
+      Mouse: mouseCelMaterial
+    };
+
+    function onModelLoaded(gltf) {
+      contentGroup.add(gltf.scene);
+      loadingHint.style.display = "none";
+
+      gltf.scene.traverse((child) => {
+        const name = child.name || "";
+        const pName = child.parent?.name || "";
+
+        // จัดเก็บออบเจกต์พัดลมสำหรับการทำ Animation
+        if (name.includes("Fan_Head")) {
+          fanHead = child;
+        }
+        if (name.includes("Fan_Blades")) {
+          fanBlades = child;
+        }
+
+        // จัดเก็บ Material หลอดไฟและดวงอาทิตย์สำหรับระบบกลางวัน-กลางคืน
+        if (name === "Desk_Lamp") {
+          deskLampBulbMat = Array.isArray(child.material)
+            ? (child.material.find(m => m.name === "Decor_LampBulb") || child.material[2])
+            : child.material;
+        }
+        if (name === "Lampbar") {
+          lampBarMat = child.material;
+        }
+
+        // ก้อนเมฆเคลื่อนไหว
+        if (name.startsWith("Cloud_")) {
+          child.castShadow = false;
+          child.receiveShadow = false;
+          child.userData = {
+            baseX: child.position.x,
+            baseY: child.position.y,
+            baseZ: child.position.z,
+            phase: clouds.length * 1.05,
+            speed: 0.35 + (clouds.length % 3) * 0.1,
+            driftX: 0.22 + (clouds.length % 3) * 0.08
+          };
+          clouds.push(child);
+          if (!cloudMat && child.material) {
+            cloudMat = child.material;
+          }
+        }
+
+        // เก็บรายชื่อชิ้นงานที่คลิกได้
+        if (PICK_INFO[name] || PICK_INFO[pName]) {
+          if (!pickableObjects.includes(child)) {
+            pickableObjects.push(child);
+          }
+        }
+
+        if (!child.isMesh) return;
+
+        // การตั้งค่าเงา
+        if (name !== "CoffeeSteam") {
+          child.castShadow = true;
+        }
+        child.receiveShadow = true;
+
+        // ปรับแต่งความเงาของวัสดุโลหะ PBR และตั้งค่า RepeatWrapping สำหรับพื้นผิวห้อง
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        mats.forEach(m => {
+          if (m?.isMeshStandardMaterial && m.metalness > 0.35) {
+            m.envMapIntensity = 2.4;
+          }
+          if (name === "Room" || pName === "Room") {
+            if (m?.map) { m.map.wrapS = m.map.wrapT = THREE.RepeatWrapping; m.map.needsUpdate = true; }
+            if (m?.normalMap) { m.normalMap.wrapS = m.normalMap.wrapT = THREE.RepeatWrapping; m.normalMap.needsUpdate = true; }
+            if (m?.roughnessMap) { m.roughnessMap.wrapS = m.roughnessMap.wrapT = THREE.RepeatWrapping; m.roughnessMap.needsUpdate = true; }
+          }
+        });
+
+        // 1) กำหนด Custom Cel Shader (เก้าอี้, คอม, จอ, คีย์บอร์ด, เมาส์)
+        const celTarget = celMap[name] ? name : (celMap[pName] ? pName : "");
+        if (celTarget) {
+          child.material = celMap[celTarget];
+        }
+
+        // 2) กำหนด Custom Vertex Displacement Shader (ต้นไม้ & กาแฟ)
+        if (Array.isArray(child.material)) {
+          child.material = child.material.map(m => {
+            if (m?.name === "Decor_Leaf" || name === "Shelf_Plant") return plantMaterial;
+            if (m?.name === "Decor_CoffeeLiquid") return coffeeMaterial;
+            return m;
+          });
+        } else {
+          if (child.material?.name === "Decor_Leaf" || name === "Shelf_Plant") {
+            child.material = plantMaterial;
+          }
+          if (child.material?.name === "Decor_CoffeeLiquid") {
+            child.material = coffeeMaterial;
+          }
+        }
+
+        // 3) กำหนด Phong Shading (พัดลม & หูฟัง)
+        if (!celTarget && (name.startsWith("Fan_") || pName.startsWith("Fan_")) && !name.includes("Blades") && !pName.includes("Blades")) {
+          child.material = fanPhongMaterial;
+        }
+        if (name === "Headphones" || pName === "Headphones") {
+          child.material = headphonesPhongMaterial;
+        }
+
+        // 4) กำหนด Lambert Shading (ตู้เก็บของ & หนังสือ)
+        if (name === "Cabinet" || pName === "Cabinet") {
+          if (child.material?.name !== "text.001") {
+            child.material = cabinetLambertMaterial;
+          }
+        }
+        if (name.includes("Books") || child.material?.name?.startsWith("Decor_Book") || child.material?.name?.startsWith("Decor_Flat")) {
+          const hash = (name.charCodeAt(name.length - 1) || 0) % bookLambertMaterials.length;
+          child.material = Array.isArray(child.material)
+            ? child.material.map((_, i) => bookLambertMaterials[i % bookLambertMaterials.length])
+            : bookLambertMaterials[hash];
+        }
+
+        // โหลดรูปโปรไฟล์ใส่กรอบรูป
+        if (child.material?.name === "Photo_Face" && !child.material.map) {
+          texLoader.load("./profile.png", tex => {
+            tex.colorSpace = THREE.SRGBColorSpace;
+            tex.flipY = false;
+            child.material.map = tex;
+            child.material.roughness = 0.35;
+            child.material.needsUpdate = true;
+          });
+        }
+      });
+    }
+
+    // ---------------------------------------------------------------------------
+    // 15. เหตุการณ์ Pointer & การคลิกเลือกชิ้นงาน (Picking)
+    // ---------------------------------------------------------------------------
+    let downX = 0;
+    let downY = 0;
+    let isDragging = false;
+
+    canvas.addEventListener("pointerdown", e => {
+      downX = e.clientX;
+      downY = e.clientY;
+      isDragging = false;
+    });
+
+    canvas.addEventListener("pointermove", e => {
+      if (Math.hypot(e.clientX - downX, e.clientY - downY) > 6) {
+        isDragging = true;
+      }
+
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const hits = raycaster.intersectObjects(pickableObjects, true);
+
+      let hasPickable = false;
+      for (let i = 0; i < hits.length; i++) {
+        let t = hits[i].object;
+        while (t && !PICK_INFO[t.name] && t.parent && t !== contentGroup) {
+          t = t.parent;
+        }
+        if (t && PICK_INFO[t.name]) {
+          hasPickable = true;
+          break;
+        }
+      }
+
+      document.body.style.cursor = hasPickable ? "pointer" : "default";
+      if (ring) {
+        ring.style.width = hasPickable ? "48px" : "36px";
+        ring.style.height = hasPickable ? "48px" : "36px";
+        ring.style.borderColor = hasPickable ? "#38bdf8" : "rgba(14, 165, 233, 0.5)";
+      }
+    });
+
+    canvas.addEventListener("pointerup", e => {
+      if (isDragging) return;
+
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const hits = raycaster.intersectObjects(pickableObjects, true);
+
+      for (let i = 0; i < hits.length; i++) {
+        let target = hits[i].object;
+        while (target && !PICK_INFO[target.name] && target.parent && target !== contentGroup) {
+          target = target.parent;
+        }
+
+        if (target && PICK_INFO[target.name]) {
+          const info = PICK_INFO[target.name];
+          focusTarget(info.cam, info.look, info.text);
+          return;
+        }
+      }
+    });
+
+    controls.addEventListener("start", () => {
+      isLerping = false;
+    });
+
+    // ปุ่มลัด Quick Navigation ด้านบน
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const key = btn.dataset.target;
+        if (PICK_INFO[key]) {
+          focusTarget(PICK_INFO[key].cam, PICK_INFO[key].look, PICK_INFO[key].text);
+        }
+      });
+    });
+
+    // Custom Mouse Cursor Effect
+    const ring = document.getElementById("cursor-ring");
+    const dot = document.getElementById("cursor-dot");
+
+    window.addEventListener("pointermove", e => {
+      if (ring && dot) {
+        ring.style.left = e.clientX + "px";
+        ring.style.top = e.clientY + "px";
+        dot.style.left = e.clientX + "px";
+        dot.style.top = e.clientY + "px";
+      }
+    });
+
+    // ---------------------------------------------------------------------------
+    // 16. การโหลดไฟล์โมเดล (GLTF Loader)
+    // ---------------------------------------------------------------------------
+    const loader = new GLTFLoader();
+    const modelUrl = "./myport.glb?v=" + Date.now();
+
+    loader.load(
+      modelUrl,
+      onModelLoaded,
+      undefined,
+      () => {
+        loader.load("./myport.glb", onModelLoaded, undefined, () => {
+          loader.load("myport.glb", onModelLoaded, undefined, err => {
+            loadingHint.textContent = "หาโมเดลไม่เจอ กรุณาตรวจสอบไฟล์ myport.glb";
+            console.error(err);
+          });
+        });
+      }
+    );
+
+    // ---------------------------------------------------------------------------
+    // 17. สลับโหมดแสงสว่าง กลางวัน / กลางคืน (Day / Night Mode)
+    // ---------------------------------------------------------------------------
+    const toggleButton = document.getElementById("theme-toggle");
+    const themeLabel   = document.getElementById("theme-label");
+    const themeIcon    = document.getElementById("theme-icon");
+
+    function applyTheme(dark) {
+      const t = dark ? THEME.dark : THEME.light;
+
+      document.body.classList.toggle("dark", dark);
+      if (themeLabel) themeLabel.textContent = dark ? "Dark" : "Light";
+      if (themeIcon)  themeIcon.textContent  = dark ? "🌙" : "☀️";
+
+      ambientLight.color.set(t.ambient);
+      ambientLight.intensity = t.ambientIntensity;
+
+      directionalLight.color.set(t.directional);
+      directionalLight.intensity = t.directionalIntensity;
+
+      if (dark) {
+        deskLampLight.intensity = 2.0;
+        lampBarLight.intensity = 1.4;
+        barDiffuseLight.intensity = 1.2;
+        plaqueLight.intensity = 1.0;
+
+        if (deskLampBulbMat) {
+          deskLampBulbMat.emissive.set(0xff9e24);
+          deskLampBulbMat.emissiveIntensity = 2.0;
+        }
+        if (lampBarMat) {
+          lampBarMat.emissive.set(0xffedd5);
+          lampBarMat.emissiveIntensity = 2.6;
+        }
+        if (typeof steamUniforms !== "undefined") {
+          steamUniforms.uColor.value.set(0xffedd8);
+        }
+      } else {
+        deskLampLight.intensity = 0;
+        lampBarLight.intensity = 0;
+        barDiffuseLight.intensity = 0;
+        plaqueLight.intensity = 1.4;
+
+        if (deskLampBulbMat) {
+          deskLampBulbMat.emissive.set(0x000000);
+          deskLampBulbMat.emissiveIntensity = 0;
+        }
+        if (lampBarMat) {
+          lampBarMat.emissive.set(0x000000);
+          lampBarMat.emissiveIntensity = 0;
+        }
+        if (typeof steamUniforms !== "undefined") {
+          steamUniforms.uColor.value.set(0xfbf6ee);
+        }
+      }
+
+      if (cloudMat) {
+        cloudMat.color.set(t.cloudColor);
+      }
+
+      themeLabel.textContent = dark ? "Dark" : "Light";
+    }
+
+    toggleButton.addEventListener("click", () => {
+      isDark = !isDark;
+      applyTheme(isDark);
+    });
+
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // ---------------------------------------------------------------------------
+    // 18. ลูปแสดงผลและ Animation (Render & Animation Loop)
+    // ---------------------------------------------------------------------------
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const elapsed = clock.getElapsedTime();
+
+      // อัปเดตเวลาให้ Custom Shaders
+      plantUniforms.uTime.value = elapsed;
+      coffeeUniforms.uTime.value = elapsed;
+      steamUniforms.uTime.value = elapsed;
+      computerUniforms.uTime.value = elapsed;
+
+      // กระพริบเคอร์เซอร์บนหน้าจอมอนิเตอร์
+      const blinkState = Math.floor(elapsed * 2.0) % 2 === 0;
+      if (blinkState !== lastBlinkState) {
+        lastBlinkState = blinkState;
+        drawMonitorScreen(blinkState);
+        screenTexture.needsUpdate = true;
+      }
+
+      // พัดลมส่ายหัวและหมุนใบพัด
+      if (fanHead) {
+        fanHead.rotation.y = 0;
+        fanHead.rotation.z = Math.sin(elapsed * 1.5) * 0.70;
+      }
+      if (fanBlades) {
+        fanBlades.rotateY(0.35);
+      }
+
+      // การเลื่อนกล้องอย่างนุ่มนวล (Smooth Camera Lerp)
+      if (isLerping) {
+        lerpProgress += 0.035;
+        if (lerpProgress >= 1.0) {
+          lerpProgress = 1.0;
+          isLerping = false;
+          camera.position.copy(camTarget);
+          controls.target.copy(lookTarget);
+        } else {
+          const t = 1 - Math.pow(1 - lerpProgress, 3);
+          camera.position.lerpVectors(lerpStartCam, camTarget, t);
+          controls.target.lerpVectors(lerpStartLook, lookTarget, t);
+        }
+      }
+
+      // การลอยของก้อนเมฆ
+      clouds.forEach(cloud => {
+        cloud.position.x = cloud.userData.baseX + Math.sin(elapsed * cloud.userData.speed + cloud.userData.phase) * cloud.userData.driftX;
+        cloud.position.y = cloud.userData.baseY + Math.sin(elapsed * cloud.userData.speed * 0.72 + cloud.userData.phase) * 0.12;
+        cloud.rotation.y += 0.0008;
+      });
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
