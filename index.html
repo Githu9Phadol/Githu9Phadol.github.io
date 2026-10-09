@@ -36,9 +36,8 @@
       padding-bottom: 60px;
     }
 
-    /* Container */
     .container {
-      max-width: 1040px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 40px 20px;
     }
@@ -129,7 +128,7 @@
     /* Featured Project Hero Card */
     .hero-project {
       background: linear-gradient(145deg, rgba(30, 27, 46, 0.95), rgba(20, 18, 31, 0.95));
-      border: 1px solid rgba(138, 124, 248, 0.25);
+      border: 1px solid rgba(138, 124, 248, 0.35);
       border-radius: 24px;
       padding: 36px 40px;
       margin-bottom: 36px;
@@ -184,9 +183,17 @@
       color: #94a3b8;
     }
 
+    .hero-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
     .btn-launch {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 10px;
       padding: 14px 28px;
       background: linear-gradient(135deg, #8a7cf8, #6366f1);
@@ -197,7 +204,6 @@
       border-radius: 14px;
       box-shadow: 0 10px 25px rgba(138, 124, 248, 0.4);
       transition: all 0.25s ease;
-      flex-shrink: 0;
     }
 
     .btn-launch:hover {
@@ -206,52 +212,127 @@
       background: linear-gradient(135deg, #9a8eff, #4f46e5);
     }
 
-    /* Section Title */
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      font-size: 13.5px;
+      font-weight: 500;
+      text-decoration: none;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+
+    /* Section Header & Filters */
+    .section-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
     .section-title {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 700;
-      margin-bottom: 20px;
       display: flex;
       align-items: center;
       gap: 10px;
       color: #ffffff;
     }
 
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      padding: 7px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
     /* Works Grid */
     .works-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 36px;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 40px;
     }
 
     .work-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 18px;
-      padding: 20px;
+      border-radius: 20px;
+      padding: 22px;
       text-decoration: none;
       color: inherit;
       transition: all 0.25s ease;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      position: relative;
     }
 
     .work-card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(138, 124, 248, 0.4);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+      transform: translateY(-4px);
+      border-color: rgba(138, 124, 248, 0.45);
+      box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
     }
 
-    .work-card.active {
-      border-color: var(--accent);
-      background: rgba(138, 124, 248, 0.08);
+    .work-card-top {
+      margin-bottom: 14px;
+    }
+
+    .work-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
     }
 
     .work-icon {
       font-size: 28px;
-      margin-bottom: 12px;
+    }
+
+    .work-cat-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #94a3b8;
     }
 
     .work-card h3 {
@@ -259,22 +340,28 @@
       font-weight: 600;
       margin-bottom: 6px;
       color: #ffffff;
+      line-height: 1.4;
     }
 
     .work-card p {
       font-size: 13px;
       color: var(--text-muted);
-      line-height: 1.4;
+      line-height: 1.5;
     }
 
     .work-arrow {
       margin-top: 14px;
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 600;
       color: var(--accent);
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      transition: gap 0.2s;
+    }
+
+    .work-card:hover .work-arrow {
+      gap: 8px;
     }
 
     /* Interactive Canvas Section */
@@ -355,6 +442,8 @@
       .profile-card, .hero-project { padding: 24px 20px; }
       .profile-info { flex-direction: column; align-items: flex-start; }
       #canvas { width: 100%; height: auto; }
+      .hero-actions { width: 100%; }
+      .btn-launch, .btn-secondary { width: 100%; }
     }
   </style>
 </head>
@@ -386,7 +475,7 @@
         <h2>3D Interactive Room Portfolio</h2>
         <p>
           ห้องจำลอง 3 มิติเชิงโต้ตอบแบบ Real-time พัฒนาด้วย Three.js, Blender และ Custom GLSL Shaders 
-          พร้อมระบบวัสดุ PBR พื้นไม้ White Oak และผนังหิน Travertine Stone, ผิวน้ำกาแฟกระเพื่อม, และระบบเปลี่ยนโหมดกลางวัน-กลางคืน
+          พร้อมระบบวัสดุ PBR พื้นไม้ White Oak และผนังหิน Travertine Stone, ผิวน้ำกาแฟกระเพื่อม, และระบบสลับโหมดกลางวัน-กลางคืน
         </p>
         <div class="hero-tags">
           <span class="hero-tag">Three.js</span>
@@ -396,59 +485,240 @@
           <span class="hero-tag">Raycasting</span>
         </div>
       </div>
-      <a href="project/myportfoilo.html" class="btn-launch">
-        <span>🚀 เปิดเข้าชมห้อง 3D Portfolio</span>
-        <span>&rarr;</span>
-      </a>
+      <div class="hero-actions">
+        <a href="project/myportfoilo.html" class="btn-launch">
+          <span>🚀 เปิดห้อง 3D ฉบับสมบูรณ์</span>
+          <span>&rarr;</span>
+        </a>
+        <a href="myportfoilo.html" class="btn-secondary">
+          <span>📁 ดูงาน 3D Room ฉบับส่งเดิม</span>
+        </a>
+      </div>
     </section>
 
-    <!-- Works Navigation Grid -->
-    <h2 class="section-title">📂 งานทั้งหมด (All Coursework)</h2>
-    <div class="works-grid">
-      <a href="#work1" class="work-card active">
-        <div>
-          <div class="work-icon">🎮</div>
-          <h3>งาน 1: 24bit Interactive</h3>
-          <p>การแสดงผลภาพ Raster 2D, PutPixel, การหมุน & ย่อขยาย Sprite ดาบเพชร</p>
-        </div>
-        <div class="work-arrow">กำลังแสดงด้านล่าง &darr;</div>
-      </a>
+    <!-- Works Navigation Section with Filter Tabs -->
+    <div class="section-header">
+      <h2 class="section-title">📂 งานทั้งหมด (All Coursework)</h2>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterWorks('all', this)">ทั้งหมด (All)</button>
+        <button class="filter-btn" onclick="filterWorks('3d', this)">🏠 3D Rooms</button>
+        <button class="filter-btn" onclick="filterWorks('2d', this)">🎮 2D & Raster</button>
+        <button class="filter-btn" onclick="filterWorks('materials', this)">💡 3D & Materials</button>
+        <button class="filter-btn" onclick="filterWorks('shaders', this)">⚡ Shaders & GPU</button>
+      </div>
+    </div>
 
-      <a href="paint.html" class="work-card">
-        <div>
-          <div class="work-icon">🎨</div>
-          <h3>งาน 2: Paint</h3>
-          <p>เว็บแอปพลิเคชันวาดภาพระบายสี พร้อมเครื่องมือแปลงสีและ Brush Tool</p>
-        </div>
-        <div class="work-arrow">เปิดผลงาน &rarr;</div>
-      </a>
+    <!-- Works Grid with All Projects -->
+    <div class="works-grid" id="worksGrid">
 
-      <a href="raster_paint.html" class="work-card">
-        <div>
-          <div class="work-icon">🖌️</div>
-          <h3>งาน 3: Raster Paint</h3>
-          <p>ระบบวาดภาพกราฟิกด้วยอัลกอริทึมการคำนวณพิกเซลระดับต่ำ (Rasterization)</p>
+      <!-- 3D Rooms -->
+      <a href="project/myportfoilo.html" class="work-card" data-cat="3d">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">🏆</span>
+            <span class="work-cat-badge">3D Room</span>
+          </div>
+          <h3>3D Room Portfolio (ฉบับสมบูรณ์)</h3>
+          <p>งานชิ้นสมบูรณ์ PBR Materials พื้นไม้ Oak, ผนัง Travertine, แก้วกาแฟหู C, แสงนุ่มสบายตา</p>
         </div>
         <div class="work-arrow">เปิดผลงาน &rarr;</div>
       </a>
 
-      <a href="pbr-scene.html" class="work-card">
-        <div>
-          <div class="work-icon">💡</div>
-          <h3>งาน 4: PBR Scene</h3>
-          <p>การจัดแสงและ Shading วัตถุแบบ Physically Based Rendering</p>
-        </div>
-        <div class="work-arrow">เปิดผลงาน &rarr;</div>
-      </a>
-
-      <a href="myportfoilo.html" class="work-card">
-        <div>
-          <div class="work-icon">📁</div>
+      <a href="myportfoilo.html" class="work-card" data-cat="3d">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">📁</span>
+            <span class="work-cat-badge">3D Room</span>
+          </div>
           <h3>3D Room (งานส่งเดิม)</h3>
-          <p>งานห้อง 3D ฉบับแรก (โมเดลต้นแบบก่อนปรับแต่งล่าสุด)</p>
+          <p>งานห้อง 3 มิติฉบับแรก (Draft โมเดลเดิมที่เคยส่งอาจารย์)</p>
         </div>
         <div class="work-arrow">เปิดผลงาน &rarr;</div>
       </a>
+
+      <!-- 2D & Raster -->
+      <a href="#work1" class="work-card" data-cat="2d">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">🎮</span>
+            <span class="work-cat-badge">2D Canvas</span>
+          </div>
+          <h3>งาน 1: 24bit Interactive</h3>
+          <p>การเขียนพิกเซลระดับล่าง PutPixel, การวาดเส้น และการหมุน/ย่อขยายดาบเพชร 24bit</p>
+        </div>
+        <div class="work-arrow">เลื่อนไปเล่นด้านล่าง &darr;</div>
+      </a>
+
+      <a href="paint.html" class="work-card" data-cat="2d">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">🎨</span>
+            <span class="work-cat-badge">2D App</span>
+          </div>
+          <h3>งาน 2: Paint Tool</h3>
+          <p>เว็บแอปพลิเคชันวาดภาพระบายสี ปรับขนาดแปรง เลือกพาเลทสี และเครื่องมือวาด</p>
+        </div>
+        <div class="work-arrow">เปิดผลงาน &rarr;</div>
+      </a>
+
+      <a href="raster_paint.html" class="work-card" data-cat="2d">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">🖌️</span>
+            <span class="work-cat-badge">Rasterization</span>
+          </div>
+          <h3>งาน 3: Raster Graphics Paint</h3>
+          <p>โปรแกรมวาดภาพบนพิกเซลกริด คำนวณเส้นตรงและรูปทรงด้วยอัลกอริทึม Rasterization</p>
+        </div>
+        <div class="work-arrow">เปิดผลงาน &rarr;</div>
+      </a>
+
+      <a href="800_Transformation.html" class="work-card" data-cat="2d">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">🔄</span>
+            <span class="work-cat-badge">2D Math</span>
+          </div>
+          <h3>2D Transformation</h3>
+          <p>การแปลงพิกัดทางเรขาคณิต Translation, Rotation, และ Scaling ด้วยเมทริกซ์ 2 มิติ</p>
+        </div>
+        <div class="work-arrow">เปิดผลงาน &rarr;</div>
+      </a>
+
+      <a href="800_raster.html" class="work-card" data-cat="2d">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">📐</span>
+            <span class="work-cat-badge">Raster Lab</span>
+          </div>
+          <h3>Raster Algorithms Lab</h3>
+          <p>ปฏิบัติการวาดเส้น Bresenham, Midpoint Circle, และการเติมสี Polygon</p>
+        </div>
+        <div class="work-arrow">เปิดผลงาน &rarr;</div>
+      </a>
+
+      <!-- 3D & Materials -->
+      <a href="Lighting.html" class="work-card" data-cat="materials">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">💡</span>
+            <span class="work-cat-badge">3D Lighting</span>
+          </div>
+          <h3>3D Lighting Studio</h3>
+          <p>ปฏิบัติการจัดแสง 3 มิติ Ambient, Directional, Point Light และเงาตกกระทบ</p>
+        </div>
+        <div class="work-arrow">เปิดผลงาน &rarr;</div>
+      </a>
+
+      <a href="pbr-scene.html" class="work-card" data-cat="materials">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">🔮</span>
+            <span class="work-cat-badge">PBR Studio</span>
+          </div>
+          <h3>PBR Rendering Scene</h3>
+          <p>การจัดแสงและการ Shading วัตถุแบบ Physically Based Rendering และ Image-Based Lighting</p>
+        </div>
+        <div class="work-arrow">เปิดผลงาน &rarr;</div>
+      </a>
+
+      <a href="gpuMeshUVknife.html" class="work-card" data-cat="materials">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">🗡️</span>
+            <span class="work-cat-badge">UV Texture</span>
+          </div>
+          <h3>Knife Texture Mapping</h3>
+          <p>การแมปพื้นผิว UV Texture ลงบนโมเดล 3 มิติ (มีด Knife Model)</p>
+        </div>
+        <div class="work-arrow">เปิดผลงาน &rarr;</div>
+      </a>
+
+      <a href="gpuMesh_UV_wood.html" class="work-card" data-cat="materials">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">🪵</span>
+            <span class="work-cat-badge">UV Texture</span>
+          </div>
+          <h3>Wood Table UV Mesh</h3>
+          <p>การขึ้นโมเดลโต๊ะไม้และการใส่ Texture ลายไม้แบบสมจริง</p>
+        </div>
+        <div class="work-arrow">เปิดผลงาน &rarr;</div>
+      </a>
+
+      <a href="gpuMesh_Vertex_UV_VertexColor.html" class="work-card" data-cat="materials">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">🌈</span>
+            <span class="work-cat-badge">Vertex Colors</span>
+          </div>
+          <h3>Vertex Color 3D Mesh</h3>
+          <p>การแสดงผลค่าสีระดับจุดยอด (Vertex Color Interpolation) ร่วมกับ UV Coordinates</p>
+        </div>
+        <div class="work-arrow">เปิดผลงาน &rarr;</div>
+      </a>
+
+      <!-- Shaders & GPU -->
+      <a href="week3/cell_shade.html" class="work-card" data-cat="shaders">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">🎭</span>
+            <span class="work-cat-badge">GLSL Shader</span>
+          </div>
+          <h3>Cel Shading (Toon Shader)</h3>
+          <p>Custom Fragment Shader สำหรับการเรนเดอร์เงาสไตล์การ์ตูน พร้อมแถบ Rim Light</p>
+        </div>
+        <div class="work-arrow">เปิดผลงาน &rarr;</div>
+      </a>
+
+      <a href="week3/800_vertex_uv_shader.html" class="work-card" data-cat="shaders">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">🌊</span>
+            <span class="work-cat-badge">GLSL Shader</span>
+          </div>
+          <h3>Vertex UV Shader</h3>
+          <p>Custom Vertex Shader การคำนวณการเคลื่อนไหวและการกระเพื่อมของจุดยอด</p>
+        </div>
+        <div class="work-arrow">เปิดผลงาน &rarr;</div>
+      </a>
+
+      <a href="week4/picking.html" class="work-card" data-cat="shaders">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">🎯</span>
+            <span class="work-cat-badge">Raycasting</span>
+          </div>
+          <h3>3D Object Picking</h3>
+          <p>ระบบตรวจจับการคลิกเลือกวัตถุ 3 มิติในพื้นที่สามมิติด้วย Three.js Raycaster</p>
+        </div>
+        <div class="work-arrow">เปิดผลงาน &rarr;</div>
+      </a>
+
+      <a href="week2/800_shader_starter.html" class="work-card" data-cat="shaders">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">⚙️</span>
+            <span class="work-cat-badge">GLSL Basic</span>
+          </div>
+          <h3>GPU Shader Starter</h3>
+          <p>โครงสร้างพื้นฐานและการคอมไพล์ Vertex & Fragment Shader บนการ์ดจอ</p>
+        </div>
+        <div class="work-arrow">เปิดผลงาน &rarr;</div>
+      </a>
+
+      <a href="800_interraction.html" class="work-card" data-cat="shaders">
+        <div class="work-card-top">
+          <div class="work-card-header">
+            <span class="work-icon">🕹️</span>
+            <span class="work-cat-badge">GPU Input</span>
+          </div>
+          <h3>GPU Interaction Lab</h3>
+          <p>การควบคุมและโต้ตอบกับวัตถุ 3 มิติผ่านเมาส์และคีย์บอร์ดแบบ Real-time</p>
+        </div>
+        <div class="work-arrow">เปิดผลงาน &rarr;</div>
+      </a>
+
     </div>
 
     <!-- Work 1: 24bit Interactive Computer Graphics Canvas -->
@@ -476,6 +746,23 @@
     </footer>
 
   </div>
+
+  <!-- Filter Script -->
+  <script>
+    function filterWorks(category, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const cards = document.querySelectorAll('#worksGrid .work-card');
+      cards.forEach(card => {
+        if (category === 'all' || card.getAttribute('data-cat') === category) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+  </script>
 
   <!-- Interactive Canvas Logic (Original code preserved 100%) -->
   <script>

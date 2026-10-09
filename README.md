@@ -73,12 +73,23 @@
 
 | ลำดับ | รายการผลงาน | เทคโนโลยี / รายละเอียด | ลิงก์เข้าชมผลงาน (Live Demo) |
 |:---:|---|---|:---:|
-| 🏆 | **Final Project: 3D Interactive Portfolio (ฉบับสมบูรณ์)** | Three.js, GLSL, Blender, PBR Materials, Raycasting | 👉 [**เปิดผลงาน 3D Room ล่าสุด**](https://githu9phadol.github.io/project/myportfoilo.html) |
-| 📁 | **3D Room (งานส่งเดิม)** | Three.js, Blender Room Model, Controls | 👉 [**เปิดงานเดิม**](https://githu9phadol.github.io/myportfoilo.html) |
+| 🏆 | **Final Project: 3D Room Portfolio (ฉบับสมบูรณ์)** | Three.js, GLSL, Blender, PBR Materials, Raycasting | 👉 [**เปิดผลงาน 3D Room ล่าสุด**](https://githu9phadol.github.io/project/myportfoilo.html) |
+| 📁 | **3D Room (งานส่งเดิม / ต้นแบบ)** | Three.js, Blender Room Model, Controls | 👉 [**เปิดงานเดิม**](https://githu9phadol.github.io/myportfoilo.html) |
 | 1 | **งาน 1: 24bit Interactive Graphics** | HTML5 Canvas 2D, PutPixel, Sprite Rotation & Scaling | 👉 [**เปิดงาน 24bit**](https://githu9phadol.github.io/index.html) |
-| 2 | **งาน 2: Paint** | Web Paint Tool, Brush Drawing, Color Palette | 👉 [**เปิดงาน Paint**](https://githu9phadol.github.io/paint.html) |
+| 2 | **งาน 2: Paint Tool** | Web Paint Tool, Brush Drawing, Color Palette | 👉 [**เปิดงาน Paint**](https://githu9phadol.github.io/paint.html) |
 | 3 | **งาน 3: Raster Graphics Paint** | Rasterization Algorithms, Pixel Operations | 👉 [**เปิดงาน Raster Paint**](https://githu9phadol.github.io/raster_paint.html) |
-| 4 | **งาน 4: PBR Lighting Scene** | WebGL PBR Shading & Lighting Studio | 👉 [**เปิดงาน PBR Scene**](https://githu9phadol.github.io/pbr-scene.html) |
+| 4 | **2D Transformation** | 2D Transformation Matrices (Translate, Rotate, Scale) | 👉 [**เปิดงาน 2D Transform**](https://githu9phadol.github.io/800_Transformation.html) |
+| 5 | **Raster Algorithms Lab** | Bresenham Line & Circle Drawing Algorithms | 👉 [**เปิดงาน Raster Lab**](https://githu9phadol.github.io/800_raster.html) |
+| 6 | **3D Lighting Studio** | Three.js Ambient, Directional & Point Lighting | 👉 [**เปิดงาน 3D Lighting**](https://githu9phadol.github.io/Lighting.html) |
+| 7 | **PBR Rendering Scene** | WebGL PBR Shading & Image-Based Lighting Studio | 👉 [**เปิดงาน PBR Scene**](https://githu9phadol.github.io/pbr-scene.html) |
+| 8 | **Knife Texture UV Mesh** | 3D Knife Model & UV Texture Mapping | 👉 [**เปิดงาน Knife UV**](https://githu9phadol.github.io/gpuMeshUVknife.html) |
+| 9 | **Wood Table UV Mesh** | 3D Wood Table Model & Texture Mapping | 👉 [**เปิดงาน Table UV**](https://githu9phadol.github.io/gpuMesh_UV_wood.html) |
+| 10 | **Vertex Color 3D Mesh** | Vertex Color Interpolation & UV Coordinates | 👉 [**เปิดงาน Vertex Color**](https://githu9phadol.github.io/gpuMesh_Vertex_UV_VertexColor.html) |
+| 11 | **Cel Shading (Toon Shader)** | Custom GLSL Fragment Shader & Rim Lighting | 👉 [**เปิดงาน Cel Shading**](https://githu9phadol.github.io/week3/cell_shade.html) |
+| 12 | **Vertex UV Shader** | Custom GLSL Vertex Shader & Wave Displacement | 👉 [**เปิดงาน Vertex Shader**](https://githu9phadol.github.io/week3/800_vertex_uv_shader.html) |
+| 13 | **3D Object Picking** | Three.js Raycaster & 3D Interactive Object Selection | 👉 [**เปิดงาน Object Picking**](https://githu9phadol.github.io/week4/picking.html) |
+| 14 | **GPU Shader Starter** | GLSL Vertex & Fragment Shader Pipeline | 👉 [**เปิดงาน Shader Starter**](https://githu9phadol.github.io/week2/800_shader_starter.html) |
+| 15 | **GPU Interaction Lab** | WebGL Real-time Mouse & Keyboard Interaction | 👉 [**เปิดงาน GPU Interaction**](https://githu9phadol.github.io/800_interraction.html) |
 
 ---
 
